@@ -26,7 +26,23 @@
 
     <input type="number" id="taskCoin" placeholder="Coins"><br><br>
 
-    <input type="text" id="taskCode" placeholder="Verification Code"><br><br>
+    <input type="number" id="taskLimit" placeholder="Limit (Leave Empty = Unlimited)"><br><br>
+
+    <input type="text" id="taskCode" placeholder="Verification Code (Optional)"><br><br>
+
+    <select id="taskType">
+        <option value="permanent">Permanent Task</option>
+        <option value="daily">Daily Task</option>
+    </select>
+
+    <br><br>
+
+    <select id="taskStatus">
+        <option value="published">Published</option>
+        <option value="pending">Pending</option>
+    </select>
+
+    <br><br>
 
     <button onclick="createTask()">Create Task</button>
 
@@ -35,4 +51,4 @@
 <script type="module" src="../js/admin.js"></script>
 
 </body>
-</html>
+            </html>
