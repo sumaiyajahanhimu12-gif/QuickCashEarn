@@ -2,7 +2,8 @@ import { auth, db } from "./firebase.js";
 
 import {
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
@@ -31,33 +32,24 @@ window.registerUser = async function () {
 
         const usersRef = collection(db, "users");
 
-        // Username Check
-        const usernameQuery = query(
-            usersRef,
-            where("username", "==", username)
+        const usernameSnap = await getDocs(
+            query(usersRef, where("username", "==", username))
         );
-
-        const usernameSnap = await getDocs(usernameQuery);
 
         if (!usernameSnap.empty) {
             alert("Username already exists");
             return;
         }
 
-        // Telegram Check
-        const telegramQuery = query(
-            usersRef,
-            where("telegram_id", "==", telegramId)
+        const telegramSnap = await getDocs(
+            query(usersRef, where("telegram_id", "==", telegramId))
         );
-
-        const telegramSnap = await getDocs(telegramQuery);
 
         if (!telegramSnap.empty) {
             alert("Telegram ID already registered");
             return;
         }
 
-        // Create Firebase Auth User
         const userCredential =
             await createUserWithEmailAndPassword(
                 auth,
@@ -67,7 +59,8 @@ window.registerUser = async function () {
 
         const user = userCredential.user;
 
-        // Auto Referral Code
+        await sendEmailVerification(user);
+
         const generatedReferralCode =
             "QCE-" +
             username.toUpperCase().substring(0, 4) +
@@ -77,9 +70,7 @@ window.registerUser = async function () {
         await setDoc(doc(db, "users", user.uid), {
 
             username: username,
-
             telegram_id: telegramId,
-
             email: email,
 
             coin: 0,
@@ -100,7 +91,9 @@ window.registerUser = async function () {
 
         });
 
-        alert("Registration Successful");
+        alert(
+            "Registration Successful.\n\nVerification email sent. Please check your inbox."
+        );
 
         window.location.href = "login.html";
 
@@ -122,13 +115,22 @@ window.loginUser = async function () {
 
     try {
 
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+        const userCredential =
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-        alert("Login Successful");
+        const user = userCredential.user;
+
+        if (!user.emailVerified) {
+
+            alert(
+                "Email not verified.\n\nPlease verify your email before using tasks and withdrawals."
+            );
+
+        }
 
         window.location.href = "dashboard.html";
 
