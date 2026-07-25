@@ -23,3 +23,29 @@ window.registerUser = async function () {
     }
 
 }
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+window.loginUser = async function () {
+
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    try {
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        alert("Login Successful");
+
+        window.location.href = "dashboard.html";
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
+
+}
