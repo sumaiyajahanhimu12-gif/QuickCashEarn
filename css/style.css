@@ -1,0 +1,30 @@
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+    background:#0f172a;
+    color:white;
+    text-align:center;
+}
+
+.container{
+    margin-top:120px;
+}
+
+h1{
+    font-size:40px;
+}
+
+p{
+    font-size:18px;
+}
+
+.buttons a{
+    display:inline-block;
+    margin:10px;
+    padding:12px 25px;
+    background:#22c55e;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+}
