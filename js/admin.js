@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db } from "../js/firebase.js";
 
 import {
     onAuthStateChanged
@@ -51,39 +51,53 @@ async function loadStats() {
     let totalUsers = 0;
     let totalCoins = 0;
 
-    usersSnapshot.forEach((doc) => {
+    usersSnapshot.forEach((userDoc) => {
 
         totalUsers++;
 
-        totalCoins += doc.data().coin || 0;
+        totalCoins += userDoc.data().coin || 0;
 
     });
 
-    document.getElementById(
-        "totalUsers"
-    ).innerText = totalUsers;
+    document.getElementById("totalUsers").innerText =
+        totalUsers;
 
-    document.getElementById(
-        "totalCoins"
-    ).innerText = totalCoins;
+    document.getElementById("totalCoins").innerText =
+        totalCoins;
 
 }
 
 window.createTask = async function () {
 
     const name =
-        document.getElementById("taskName").value;
+        document.getElementById("taskName").value.trim();
 
     const link =
-        document.getElementById("taskLink").value;
+        document.getElementById("taskLink").value.trim();
 
     const coin =
         parseInt(
             document.getElementById("taskCoin").value
         );
 
+    const limitValue =
+        document.getElementById("taskLimit").value;
+
     const code =
-        document.getElementById("taskCode").value;
+        document.getElementById("taskCode").value.trim();
+
+    const type =
+        document.getElementById("taskType").value;
+
+    const status =
+        document.getElementById("taskStatus").value;
+
+    if (!name || !link || !coin) {
+
+        alert("Please fill required fields");
+
+        return;
+    }
 
     try {
 
@@ -97,13 +111,15 @@ window.createTask = async function () {
 
                 coin: coin,
 
-                code: code,
+                limit: limitValue
+                    ? parseInt(limitValue)
+                    : null,
 
-                type: "permanent",
+                code: code || "",
 
-                status: "published",
+                type: type,
 
-                limit: 999999,
+                status: status,
 
                 completed_count: 0,
 
@@ -113,7 +129,13 @@ window.createTask = async function () {
             }
         );
 
-        alert("Task Created");
+        alert("Task Created Successfully");
+
+        document.getElementById("taskName").value = "";
+        document.getElementById("taskLink").value = "";
+        document.getElementById("taskCoin").value = "";
+        document.getElementById("taskLimit").value = "";
+        document.getElementById("taskCode").value = "";
 
     } catch (error) {
 
