@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Referrals</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
+<div class="container">
+
+    <h1>My Referrals</h1>
+
+    <p>
+        Your Referral Code:
+        <span id="myCode">
+            Loading...
+        </span>
+    </p>
+
+    <p>
+        Total Referrals:
+        <span id="totalReferrals">
+            0
+        </span>
+    </p>
+
+    <p>
+        Valid Referrals:
+        <span id="validReferrals">
+            0
+        </span>
+    </p>
+
+    <p>
+        Top 10 Referral Coins:
+        <span id="top10Coins">
+            0
+        </span>
+        / 100000
+    </p>
+
+    <hr>
+
+    <div id="referralList">
+
+        Loading Referrals...
+
+    </div>
+
+    <br>
+
+    <button
+    onclick="window.location.href='dashboard.html'">
+    Back To Dashboard
+    </button>
+
+</div>
+
+<script type="module" src="js/referrals.js"></script>
+
+</body>
+</html>
