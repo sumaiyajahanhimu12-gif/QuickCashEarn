@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Withdraw</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Withdraw Coins</h1>
+
+    <p>
+        Current Balance:
+        <span id="coinBalance">0</span>
+    </p>
+
+    <hr>
+
+    <select id="method">
+
+        <option value="bkash">
+            Bkash
+        </option>
+
+        <option value="nagad">
+            Nagad
+        </option>
+
+    </select>
+
+    <br><br>
+
+    <input
+    type="text"
+    id="number"
+    placeholder="017XXXXXXXX">
+
+    <br><br>
+
+    <input
+    type="number"
+    id="amount"
+    placeholder="Coin Amount">
+
+    <br><br>
+
+    <button onclick="submitWithdraw()">
+        Submit Withdraw
+    </button>
+
+    <br><br>
+
+    <button
+    onclick="window.location.href='dashboard.html'">
+    Back
+    </button>
+
+</div>
+
+<script type="module" src="js/withdraw.js"></script>
+
+</body>
+  </html>
