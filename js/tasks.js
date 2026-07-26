@@ -19,11 +19,8 @@ let tasksData = [];
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
-
         window.location.href = "login.html";
-
         return;
-
     }
 
     loadTasks();
@@ -246,6 +243,12 @@ window.claimTask = async function(taskId) {
                 user.uid
             );
 
+        const userSnap =
+            await getDoc(userRef);
+
+        const userData =
+            userSnap.data();
+
         await updateDoc(
             userRef,
             {
@@ -255,6 +258,49 @@ window.claimTask = async function(taskId) {
                 )
             }
         );
+
+        const lastDate =
+            userData.last_active_date || "";
+
+        if (lastDate !== today) {
+
+            let newActiveDays = 1;
+
+            if (lastDate) {
+
+                const last =
+                    new Date(lastDate);
+
+                const current =
+                    new Date(today);
+
+                const diffDays =
+                    Math.floor(
+                        (current - last) /
+                        (1000 * 60 * 60 * 24)
+                    );
+
+                if (diffDays === 1) {
+
+                    newActiveDays =
+                        (userData.active_days || 0) + 1;
+
+                }
+
+            }
+
+            await updateDoc(
+                userRef,
+                {
+                    active_days:
+                        newActiveDays,
+
+                    last_active_date:
+                        today
+                }
+            );
+
+        }
 
         await setDoc(
             claimRef,
@@ -270,8 +316,10 @@ window.claimTask = async function(taskId) {
         );
 
         alert(
-            `${task.coin} Coins Added`
+            `${task.coin} Coins Added Successfully`
         );
+
+        location.reload();
 
     } catch (error) {
 
