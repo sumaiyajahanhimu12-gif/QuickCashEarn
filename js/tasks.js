@@ -9,6 +9,8 @@ import {
     getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+let tasksData = [];
+
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
@@ -35,6 +37,8 @@ async function loadTasks() {
             collection(db, "tasks")
         );
 
+    tasksData = [];
+
     snapshot.forEach((taskDoc) => {
 
         const task = taskDoc.data();
@@ -43,9 +47,16 @@ async function loadTasks() {
             return;
         }
 
+        const taskId = taskDoc.id;
+
+        tasksData.push({
+            id: taskId,
+            ...task
+        });
+
         container.innerHTML += `
 
-        <div class="task-card">
+        <div class="task-card" id="task-${taskId}">
 
             <h3>${task.name}</h3>
 
@@ -55,9 +66,11 @@ async function loadTasks() {
             </p>
 
             <button
-            onclick="window.open('${task.link}','_blank')">
+            onclick="openTask('${taskId}','${task.link}')">
             Open Task
             </button>
+
+            <div id="claim-${taskId}"></div>
 
         </div>
 
@@ -68,3 +81,54 @@ async function loadTasks() {
     });
 
 }
+
+window.openTask = function(taskId, link) {
+
+    window.open(link, "_blank");
+
+    const task =
+        tasksData.find(
+            t => t.id === taskId
+        );
+
+    let html = "";
+
+    if (task.code && task.code.trim() !== "") {
+
+        html += `
+
+        <br>
+
+        <input
+        type="text"
+        id="code-${taskId}"
+        placeholder="Enter Verification Code">
+
+        <br><br>
+
+        `;
+
+    }
+
+    html += `
+
+    <button
+    onclick="claimTask('${taskId}')">
+    Claim Reward
+    </button>
+
+    `;
+
+    document.getElementById(
+        `claim-${taskId}`
+    ).innerHTML = html;
+
+};
+
+window.claimTask = function(taskId) {
+
+    alert(
+        "Claim System will be connected in next step."
+    );
+
+};
