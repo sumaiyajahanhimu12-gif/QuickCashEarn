@@ -12,43 +12,99 @@
 
     <h1>Admin Dashboard</h1>
 
-    <p>Total Users: <span id="totalUsers">0</span></p>
+    <p>
+        Total Users:
+        <span id="totalUsers">0</span>
+    </p>
 
-    <p>Total Coins: <span id="totalCoins">0</span></p>
+    <p>
+        Total Coins:
+        <span id="totalCoins">0</span>
+    </p>
+
+    <hr>
+
+    <button
+    onclick="window.location.href='withdraws.html'">
+        Withdraw Requests
+    </button>
+
+    <br><br>
 
     <hr>
 
     <h2>Create Task</h2>
 
-    <input type="text" id="taskName" placeholder="Task Name"><br><br>
+    <input
+    type="text"
+    id="taskName"
+    placeholder="Task Name">
 
-    <input type="text" id="taskLink" placeholder="Task Link"><br><br>
+    <br><br>
 
-    <input type="number" id="taskCoin" placeholder="Coins"><br><br>
+    <input
+    type="text"
+    id="taskLink"
+    placeholder="Task Link">
 
-    <input type="number" id="taskLimit" placeholder="Limit (Leave Empty = Unlimited)"><br><br>
+    <br><br>
 
-    <input type="text" id="taskCode" placeholder="Verification Code (Optional)"><br><br>
+    <input
+    type="number"
+    id="taskCoin"
+    placeholder="Coins">
+
+    <br><br>
+
+    <input
+    type="number"
+    id="taskLimit"
+    placeholder="Limit (Leave Empty = Unlimited)">
+
+    <br><br>
+
+    <input
+    type="text"
+    id="taskCode"
+    placeholder="Verification Code (Optional)">
+
+    <br><br>
 
     <select id="taskType">
-        <option value="permanent">Permanent Task</option>
-        <option value="daily">Daily Task</option>
+
+        <option value="permanent">
+            Permanent Task
+        </option>
+
+        <option value="daily">
+            Daily Task
+        </option>
+
     </select>
 
     <br><br>
 
     <select id="taskStatus">
-        <option value="published">Published</option>
-        <option value="pending">Pending</option>
+
+        <option value="published">
+            Published
+        </option>
+
+        <option value="pending">
+            Pending
+        </option>
+
     </select>
 
     <br><br>
 
-    <button onclick="createTask()">Create Task</button>
+    <button onclick="createTask()">
+        Create Task
+    </button>
 
 </div>
 
 <script type="module" src="../js/admin.js"></script>
 
 </body>
-            </html>
+</html>
