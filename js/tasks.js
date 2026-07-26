@@ -6,7 +6,12 @@ import {
 
 import {
     collection,
-    getDocs
+    getDocs,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let tasksData = [];
@@ -56,14 +61,11 @@ async function loadTasks() {
 
         container.innerHTML += `
 
-        <div class="task-card" id="task-${taskId}">
+        <div class="task-card">
 
             <h3>${task.name}</h3>
 
-            <p>
-                Reward:
-                ${task.coin} Coins
-            </p>
+            <p>Reward: ${task.coin} Coins</p>
 
             <button
             onclick="openTask('${taskId}','${task.link}')">
@@ -93,7 +95,10 @@ window.openTask = function(taskId, link) {
 
     let html = "";
 
-    if (task.code && task.code.trim() !== "") {
+    if (
+        task.code &&
+        task.code.trim() !== ""
+    ) {
 
         html += `
 
@@ -125,10 +130,153 @@ window.openTask = function(taskId, link) {
 
 };
 
-window.claimTask = function(taskId) {
+window.claimTask = async function(taskId) {
 
-    alert(
-        "Claim System will be connected in next step."
-    );
+    try {
+
+        const user =
+            auth.currentUser;
+
+        if (!user) {
+
+            alert("Login Required");
+
+            return;
+
+        }
+
+        const task =
+            tasksData.find(
+                t => t.id === taskId
+            );
+
+        if (!task) {
+
+            alert("Task Not Found");
+
+            return;
+
+        }
+
+        if (
+            task.code &&
+            task.code.trim() !== ""
+        ) {
+
+            const enteredCode =
+                document
+                .getElementById(
+                    `code-${taskId}`
+                )
+                .value
+                .trim();
+
+            if (
+                enteredCode !== task.code
+            ) {
+
+                alert(
+                    "Wrong Verification Code"
+                );
+
+                return;
+
+            }
+
+        }
+
+        const today =
+            new Date()
+            .toISOString()
+            .split("T")[0];
+
+        const claimId =
+            `${user.uid}_${taskId}`;
+
+        const claimRef =
+            doc(
+                db,
+                "task_claims",
+                claimId
+            );
+
+        const claimSnap =
+            await getDoc(
+                claimRef
+            );
+
+        if (
+            claimSnap.exists()
+        ) {
+
+            const claimData =
+                claimSnap.data();
+
+            if (
+                task.type === "permanent"
+            ) {
+
+                alert(
+                    "Already Claimed"
+                );
+
+                return;
+
+            }
+
+            if (
+                task.type === "daily" &&
+                claimData.last_claim_date === today
+            ) {
+
+                alert(
+                    "Already Claimed Today"
+                );
+
+                return;
+
+            }
+
+        }
+
+        const userRef =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+        await updateDoc(
+            userRef,
+            {
+                coin:
+                increment(
+                    task.coin
+                )
+            }
+        );
+
+        await setDoc(
+            claimRef,
+            {
+                uid: user.uid,
+                task_id: taskId,
+                task_type: task.type,
+                last_claim_date: today,
+                claimed_at:
+                    new Date()
+                    .toISOString()
+            }
+        );
+
+        alert(
+            `${task.coin} Coins Added`
+        );
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
 
 };
