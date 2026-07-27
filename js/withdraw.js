@@ -10,7 +10,10 @@ import {
     addDoc,
     collection,
     updateDoc,
-    increment
+    increment,
+    getDocs,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let currentUserData = null;
@@ -59,6 +62,39 @@ window.submitWithdraw = async function () {
         if (!user) {
 
             alert("Login Required");
+
+            return;
+
+        }
+
+        const pendingQuery =
+            query(
+                collection(
+                    db,
+                    "withdraw_requests"
+                ),
+                where(
+                    "uid",
+                    "==",
+                    user.uid
+                ),
+                where(
+                    "status",
+                    "==",
+                    "pending"
+                )
+            );
+
+        const pendingSnap =
+            await getDocs(
+                pendingQuery
+            );
+
+        if (!pendingSnap.empty) {
+
+            alert(
+                "You already have a pending withdraw request"
+            );
 
             return;
 
