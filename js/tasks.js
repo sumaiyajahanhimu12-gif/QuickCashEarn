@@ -11,7 +11,10 @@ import {
     getDoc,
     setDoc,
     updateDoc,
-    increment
+    increment,
+    addDoc,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let tasksData = [];
@@ -19,8 +22,10 @@ let tasksData = [];
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
+
         window.location.href = "login.html";
         return;
+
     }
 
     await loadTasks();
@@ -76,14 +81,12 @@ async function loadTasks() {
             const claimData =
                 claimSnap.data();
 
-            // Permanent Task Hide Forever
             if (
                 task.type === "permanent"
             ) {
                 continue;
             }
 
-            // Daily Task Hide Today
             if (
                 task.type === "daily" &&
                 claimData.last_claim_date === today
@@ -297,6 +300,8 @@ window.claimTask = async function(taskId) {
         const userData =
             userSnap.data();
 
+        // User Coin Add
+
         await updateDoc(
             userRef,
             {
@@ -307,72 +312,15 @@ window.claimTask = async function(taskId) {
             }
         );
 
-        const lastDate =
-            userData.last_active_date || "";
+        // Referral Bonus
 
-        if (lastDate !== today) {
+        if (
+            userData.referred_by &&
+            userData.referred_by.trim() !== ""
+        ) {
 
-            let newActiveDays = 1;
-
-            if (lastDate) {
-
-                const last =
-                    new Date(lastDate);
-
-                const current =
-                    new Date(today);
-
-                const diffDays =
-                    Math.floor(
-                        (current - last) /
-                        (1000 * 60 * 60 * 24)
-                    );
-
-                if (diffDays === 1) {
-
-                    newActiveDays =
-                        (userData.active_days || 0) + 1;
-
-                }
-
-            }
-
-            await updateDoc(
-                userRef,
-                {
-                    active_days:
-                        newActiveDays,
-
-                    last_active_date:
-                        today
-                }
-            );
-
-        }
-
-        await setDoc(
-            claimRef,
-            {
-                uid: user.uid,
-                task_id: taskId,
-                task_type: task.type,
-                last_claim_date: today,
-                claimed_at:
-                    new Date()
-                    .toISOString()
-            }
-        );
-
-        alert(
-            `${task.coin} Coins Added Successfully`
-        );
-
-        await loadTasks();
-
-    } catch (error) {
-
-        alert(error.message);
-
-    }
-
-};
+            const referralQuery =
+                query(
+                    collection(db, "users"),
+                    where(
+                        "ref
