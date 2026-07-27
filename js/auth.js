@@ -9,6 +9,8 @@ import {
 import {
     doc,
     setDoc,
+    updateDoc,
+    getDoc,
     collection,
     query,
     where,
@@ -17,37 +19,109 @@ import {
 
 window.registerUser = async function () {
 
-    const username = document.getElementById("username").value.trim();
-    const telegramId = document.getElementById("telegramId").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const referralCode = document.getElementById("referralCode").value.trim();
+    const username =
+        document.getElementById("username").value.trim();
 
-    if (!username || !telegramId || !email || !password) {
+    const telegramId =
+        document.getElementById("telegramId").value.trim();
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const referralCode =
+        document.getElementById("referralCode").value.trim();
+
+    if (
+        !username ||
+        !telegramId ||
+        !email ||
+        !password
+    ) {
+
         alert("Please fill all required fields");
+
         return;
+
     }
 
     try {
 
-        const usersRef = collection(db, "users");
+        const usersRef =
+            collection(db, "users");
 
-        const usernameSnap = await getDocs(
-            query(usersRef, where("username", "==", username))
-        );
+        const usernameSnap =
+            await getDocs(
+                query(
+                    usersRef,
+                    where(
+                        "username",
+                        "==",
+                        username
+                    )
+                )
+            );
 
         if (!usernameSnap.empty) {
-            alert("Username already exists");
+
+            alert(
+                "Username already exists"
+            );
+
             return;
+
         }
 
-        const telegramSnap = await getDocs(
-            query(usersRef, where("telegram_id", "==", telegramId))
-        );
+        const telegramSnap =
+            await getDocs(
+                query(
+                    usersRef,
+                    where(
+                        "telegram_id",
+                        "==",
+                        telegramId
+                    )
+                )
+            );
 
         if (!telegramSnap.empty) {
-            alert("Telegram ID already registered");
+
+            alert(
+                "Telegram ID already registered"
+            );
+
             return;
+
+        }
+
+        if (referralCode) {
+
+            const referralSnap =
+                await getDocs(
+                    query(
+                        usersRef,
+                        where(
+                            "referral_code",
+                            "==",
+                            referralCode
+                        )
+                    )
+                );
+
+            if (
+                referralSnap.empty
+            ) {
+
+                alert(
+                    "Invalid Referral Code"
+                );
+
+                return;
+
+            }
+
         }
 
         const userCredential =
@@ -57,45 +131,72 @@ window.registerUser = async function () {
                 password
             );
 
-        const user = userCredential.user;
+        const user =
+            userCredential.user;
 
-        await sendEmailVerification(user);
+        await sendEmailVerification(
+            user
+        );
 
         const generatedReferralCode =
             "QCE-" +
-            username.toUpperCase().substring(0, 4) +
+            username
+                .toUpperCase()
+                .substring(0, 4) +
             "-" +
-            Math.floor(1000 + Math.random() * 9000);
+            Math.floor(
+                1000 +
+                Math.random() * 9000
+            );
 
-        await setDoc(doc(db, "users", user.uid), {
+        await setDoc(
+            doc(
+                db,
+                "users",
+                user.uid
+            ),
+            {
 
-            username: username,
-            telegram_id: telegramId,
-            email: email,
+                username:
+                    username,
 
-            coin: 0,
+                telegram_id:
+                    telegramId,
 
-            referral_code: generatedReferralCode,
+                email:
+                    email,
 
-            referred_by: referralCode || "",
+                coin: 0,
 
-            active_days: 0,
+                referral_code:
+                    generatedReferralCode,
 
-            email_verified: false,
+                referred_by:
+                    referralCode || "",
 
-            telegram_verified: false,
+                active_days: 0,
 
-            role: "user",
+                email_verified:
+                    false,
 
-            created_at: new Date().toISOString()
+                telegram_verified:
+                    false,
 
-        });
+                role: "user",
 
-        alert(
-            "Registration Successful.\n\nVerification email sent. Please check your inbox."
+                created_at:
+                    new Date()
+                    .toISOString()
+
+            }
         );
 
-        window.location.href = "login.html";
+        alert(
+            "Registration Successful.\n\nVerification email sent."
+        );
+
+        window.location.href =
+            "login.html";
 
     } catch (error) {
 
@@ -108,10 +209,19 @@ window.registerUser = async function () {
 window.loginUser = async function () {
 
     const email =
-        document.getElementById("loginEmail").value.trim();
+        document
+        .getElementById(
+            "loginEmail"
+        )
+        .value
+        .trim();
 
     const password =
-        document.getElementById("loginPassword").value;
+        document
+        .getElementById(
+            "loginPassword"
+        )
+        .value;
 
     try {
 
@@ -122,17 +232,34 @@ window.loginUser = async function () {
                 password
             );
 
-        const user = userCredential.user;
+        const user =
+            userCredential.user;
 
-        if (!user.emailVerified) {
+        await user.reload();
 
-            alert(
-                "Email not verified.\n\nPlease verify your email before using tasks and withdrawals."
+        const userRef =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+        if (
+            user.emailVerified
+        ) {
+
+            await updateDoc(
+                userRef,
+                {
+                    email_verified:
+                        true
+                }
             );
 
         }
 
-        window.location.href = "dashboard.html";
+        window.location.href =
+            "dashboard.html";
 
     } catch (error) {
 
