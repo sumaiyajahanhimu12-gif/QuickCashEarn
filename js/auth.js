@@ -10,7 +10,6 @@ import {
     doc,
     setDoc,
     updateDoc,
-    getDoc,
     collection,
     query,
     where,
@@ -42,7 +41,6 @@ window.registerUser = async function () {
     ) {
 
         alert("Please fill all required fields");
-
         return;
 
     }
@@ -66,10 +64,7 @@ window.registerUser = async function () {
 
         if (!usernameSnap.empty) {
 
-            alert(
-                "Username already exists"
-            );
-
+            alert("Username already exists");
             return;
 
         }
@@ -88,10 +83,7 @@ window.registerUser = async function () {
 
         if (!telegramSnap.empty) {
 
-            alert(
-                "Telegram ID already registered"
-            );
-
+            alert("Telegram ID already registered");
             return;
 
         }
@@ -110,14 +102,9 @@ window.registerUser = async function () {
                     )
                 );
 
-            if (
-                referralSnap.empty
-            ) {
+            if (referralSnap.empty) {
 
-                alert(
-                    "Invalid Referral Code"
-                );
-
+                alert("Invalid Referral Code");
                 return;
 
             }
@@ -134,9 +121,7 @@ window.registerUser = async function () {
         const user =
             userCredential.user;
 
-        await sendEmailVerification(
-            user
-        );
+        await sendEmailVerification(user);
 
         const generatedReferralCode =
             "QCE-" +
@@ -192,6 +177,11 @@ window.registerUser = async function () {
         );
 
         alert(
+            "USER UID:\n" +
+            user.uid
+        );
+
+        alert(
             "Registration Successful.\n\nVerification email sent."
         );
 
@@ -200,7 +190,14 @@ window.registerUser = async function () {
 
     } catch (error) {
 
-        alert(error.message);
+        console.log(error);
+
+        alert(
+            "REGISTER ERROR\n\n" +
+            error.code +
+            "\n\n" +
+            error.message
+        );
 
     }
 
@@ -258,12 +255,21 @@ window.loginUser = async function () {
 
         }
 
+        alert("Login Successful");
+
         window.location.href =
             "dashboard.html";
 
     } catch (error) {
 
-        alert(error.message);
+        console.log(error);
+
+        alert(
+            "LOGIN ERROR\n\n" +
+            error.code +
+            "\n\n" +
+            error.message
+        );
 
     }
 
