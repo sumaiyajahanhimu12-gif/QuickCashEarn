@@ -71,6 +71,18 @@ onAuthStateChanged(auth, async (user) => {
             ? "Verified ✅"
             : "Not Verified ❌";
 
+        // Admin Panel Button Show
+        if (
+            data.role === "admin"
+        ) {
+
+            document.getElementById(
+                "adminPanelBtn"
+            ).style.display =
+                "inline-block";
+
+        }
+
     } catch (error) {
 
         console.error(error);
