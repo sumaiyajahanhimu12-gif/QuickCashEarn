@@ -23,11 +23,13 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    loadTasks();
+    await loadTasks();
 
 });
 
 async function loadTasks() {
+
+    const user = auth.currentUser;
 
     const container =
         document.getElementById("tasksContainer");
@@ -41,15 +43,55 @@ async function loadTasks() {
 
     tasksData = [];
 
-    snapshot.forEach((taskDoc) => {
+    const today =
+        new Date()
+        .toISOString()
+        .split("T")[0];
+
+    for (const taskDoc of snapshot.docs) {
 
         const task = taskDoc.data();
 
         if (task.status !== "published") {
-            return;
+            continue;
         }
 
         const taskId = taskDoc.id;
+
+        const claimId =
+            `${user.uid}_${taskId}`;
+
+        const claimRef =
+            doc(
+                db,
+                "task_claims",
+                claimId
+            );
+
+        const claimSnap =
+            await getDoc(claimRef);
+
+        if (claimSnap.exists()) {
+
+            const claimData =
+                claimSnap.data();
+
+            // Permanent Task Hide Forever
+            if (
+                task.type === "permanent"
+            ) {
+                continue;
+            }
+
+            // Daily Task Hide Today
+            if (
+                task.type === "daily" &&
+                claimData.last_claim_date === today
+            ) {
+                continue;
+            }
+
+        }
 
         tasksData.push({
             id: taskId,
@@ -64,6 +106,8 @@ async function loadTasks() {
 
             <p>Reward: ${task.coin} Coins</p>
 
+            <p>Type: ${task.type}</p>
+
             <button
             onclick="openTask('${taskId}','${task.link}')">
             Open Task
@@ -76,8 +120,14 @@ async function loadTasks() {
         <hr>
 
         `;
+    }
 
-    });
+    if (container.innerHTML === "") {
+
+        container.innerHTML =
+            "<p>No Tasks Available</p>";
+
+    }
 
 }
 
@@ -137,7 +187,6 @@ window.claimTask = async function(taskId) {
         if (!user) {
 
             alert("Login Required");
-
             return;
 
         }
@@ -150,7 +199,6 @@ window.claimTask = async function(taskId) {
         if (!task) {
 
             alert("Task Not Found");
-
             return;
 
         }
@@ -319,7 +367,7 @@ window.claimTask = async function(taskId) {
             `${task.coin} Coins Added Successfully`
         );
 
-        location.reload();
+        await loadTasks();
 
     } catch (error) {
 
