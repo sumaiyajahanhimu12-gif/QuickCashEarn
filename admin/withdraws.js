@@ -9,7 +9,8 @@ import {
     getDoc,
     collection,
     getDocs,
-    updateDoc
+    updateDoc,
+    increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 onAuthStateChanged(auth, async (user) => {
@@ -151,21 +152,54 @@ async function(requestId) {
 
     try {
 
-        await updateDoc(
+        const requestRef =
             doc(
                 db,
                 "withdraw_requests",
                 requestId
+            );
+
+        const requestSnap =
+            await getDoc(
+                requestRef
+            );
+
+        if (!requestSnap.exists()) {
+
+            alert(
+                "Request Not Found"
+            );
+
+            return;
+
+        }
+
+        const requestData =
+            requestSnap.data();
+
+        await updateDoc(
+            requestRef,
+            {
+                status: "rejected"
+            }
+        );
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                requestData.uid
             ),
             {
-
-                status: "rejected"
-
+                coin:
+                increment(
+                    requestData.coin
+                )
             }
         );
 
         alert(
-            "Withdraw Rejected"
+            "Withdraw Rejected & Coins Refunded"
         );
 
         location.reload();
