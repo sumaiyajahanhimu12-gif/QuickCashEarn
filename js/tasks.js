@@ -1,7 +1,8 @@
 import { auth, db } from "./firebase.js";
 
 import {
-    onAuthStateChanged
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
@@ -24,26 +25,87 @@ onAuthStateChanged(auth, async (user) => {
     if (!user) {
 
         window.location.href = "login.html";
+
         return;
 
     }
 
-    await loadTasks();
+    try {
+
+        const userRef =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+        const userSnap =
+            await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+
+            alert("User Not Found");
+
+            await signOut(auth);
+
+            window.location.href =
+                "login.html";
+
+            return;
+
+        }
+
+        const userData =
+            userSnap.data();
+
+        // BAN PROTECTION
+
+        if (
+            userData.status ===
+            "banned"
+        ) {
+
+            alert(
+                "Your Account Has Been Suspended"
+            );
+
+            await signOut(auth);
+
+            window.location.href =
+                "login.html";
+
+            return;
+
+        }
+
+        await loadTasks();
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
 
 });
 
 async function loadTasks() {
 
-    const user = auth.currentUser;
+    const user =
+        auth.currentUser;
 
     const container =
-        document.getElementById("tasksContainer");
+        document.getElementById(
+            "tasksContainer"
+        );
 
     container.innerHTML = "";
 
     const snapshot =
         await getDocs(
-            collection(db, "tasks")
+            collection(
+                db,
+                "tasks"
+            )
         );
 
     tasksData = [];
@@ -53,15 +115,24 @@ async function loadTasks() {
         .toISOString()
         .split("T")[0];
 
-    for (const taskDoc of snapshot.docs) {
+    for (
+        const taskDoc of snapshot.docs
+    ) {
 
-        const task = taskDoc.data();
+        const task =
+            taskDoc.data();
 
-        if (task.status !== "published") {
+        if (
+            task.status !==
+            "published"
+        ) {
+
             continue;
+
         }
 
-        const taskId = taskDoc.id;
+        const taskId =
+            taskDoc.id;
 
         const claimId =
             `${user.uid}_${taskId}`;
@@ -74,31 +145,45 @@ async function loadTasks() {
             );
 
         const claimSnap =
-            await getDoc(claimRef);
+            await getDoc(
+                claimRef
+            );
 
-        if (claimSnap.exists()) {
+        if (
+            claimSnap.exists()
+        ) {
 
             const claimData =
                 claimSnap.data();
 
             if (
-                task.type === "permanent"
+                task.type ===
+                "permanent"
             ) {
+
                 continue;
+
             }
 
             if (
-                task.type === "daily" &&
-                claimData.last_claim_date === today
+                task.type ===
+                    "daily" &&
+                claimData.last_claim_date ===
+                    today
             ) {
+
                 continue;
+
             }
 
         }
 
         tasksData.push({
+
             id: taskId,
+
             ...task
+
         });
 
         container.innerHTML += `
@@ -107,25 +192,41 @@ async function loadTasks() {
 
             <h3>${task.name}</h3>
 
-            <p>Reward: ${task.coin} Coins</p>
+            <p>
+                Reward:
+                ${task.coin}
+                Coins
+            </p>
 
-            <p>Type: ${task.type}</p>
+            <p>
+                Type:
+                ${task.type}
+            </p>
 
             <button
             onclick="openTask('${taskId}','${task.link}')">
+
             Open Task
+
             </button>
 
-            <div id="claim-${taskId}"></div>
+            <div
+            id="claim-${taskId}">
+
+            </div>
 
         </div>
 
         <hr>
 
         `;
+
     }
 
-    if (container.innerHTML === "") {
+    if (
+        container.innerHTML ===
+        ""
+    ) {
 
         container.innerHTML =
             "<p>No Tasks Available</p>";
@@ -134,13 +235,22 @@ async function loadTasks() {
 
 }
 
-window.openTask = function(taskId, link) {
+window.openTask =
+function (
+    taskId,
+    link
+) {
 
-    window.open(link, "_blank");
+    window.open(
+        link,
+        "_blank"
+    );
 
     const task =
         tasksData.find(
-            t => t.id === taskId
+            (t) =>
+                t.id ===
+                taskId
         );
 
     let html = "";
@@ -169,18 +279,24 @@ window.openTask = function(taskId, link) {
 
     <button
     onclick="claimTask('${taskId}')">
+
     Claim Reward
+
     </button>
 
     `;
 
     document.getElementById(
         `claim-${taskId}`
-    ).innerHTML = html;
+    ).innerHTML =
+        html;
 
 };
 
-window.claimTask = async function(taskId) {
+window.claimTask =
+async function (
+    taskId
+) {
 
     try {
 
@@ -189,38 +305,95 @@ window.claimTask = async function(taskId) {
 
         if (!user) {
 
-            alert("Login Required");
+            alert(
+                "Login Required"
+            );
+
+            return;
+
+        }
+
+        const userRef =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+        const userSnap =
+            await getDoc(
+                userRef
+            );
+
+        if (
+            !userSnap.exists()
+        ) {
+
+            alert(
+                "User Not Found"
+            );
+
+            return;
+
+        }
+
+        const userData =
+            userSnap.data();
+
+        // BAN PROTECTION
+
+        if (
+            userData.status ===
+            "banned"
+        ) {
+
+            alert(
+                "Your Account Has Been Suspended"
+            );
+
+            await signOut(auth);
+
+            window.location.href =
+                "login.html";
+
             return;
 
         }
 
         const task =
             tasksData.find(
-                t => t.id === taskId
+                (t) =>
+                    t.id ===
+                    taskId
             );
 
         if (!task) {
 
-            alert("Task Not Found");
+            alert(
+                "Task Not Found"
+            );
+
             return;
 
         }
 
         if (
             task.code &&
-            task.code.trim() !== ""
+            task.code.trim() !==
+                ""
         ) {
 
             const enteredCode =
                 document
-                .getElementById(
-                    `code-${taskId}`
-                )
-                .value
-                .trim();
+                    .getElementById(
+                        `code-${taskId}`
+                    )
+                    .value
+                    .trim();
 
             if (
-                enteredCode !== task.code
+                enteredCode !==
+                task.code
             ) {
 
                 alert(
@@ -261,7 +434,8 @@ window.claimTask = async function(taskId) {
                 claimSnap.data();
 
             if (
-                task.type === "permanent"
+                task.type ===
+                "permanent"
             ) {
 
                 alert(
@@ -273,8 +447,10 @@ window.claimTask = async function(taskId) {
             }
 
             if (
-                task.type === "daily" &&
-                claimData.last_claim_date === today
+                task.type ===
+                    "daily" &&
+                claimData.last_claim_date ===
+                    today
             ) {
 
                 alert(
@@ -287,40 +463,222 @@ window.claimTask = async function(taskId) {
 
         }
 
-        const userRef =
-            doc(
-                db,
-                "users",
-                user.uid
-            );
-
-        const userSnap =
-            await getDoc(userRef);
-
-        const userData =
-            userSnap.data();
-
-        // User Coin Add
-
         await updateDoc(
             userRef,
             {
+
                 coin:
-                increment(
-                    task.coin
-                )
+                    increment(
+                        task.coin
+                    )
+
             }
         );
 
-        // Referral Bonus
+        // REFERRAL BONUS
 
         if (
             userData.referred_by &&
-            userData.referred_by.trim() !== ""
+            userData.referred_by.trim() !==
+                ""
         ) {
 
             const referralQuery =
                 query(
-                    collection(db, "users"),
+                    collection(
+                        db,
+                        "users"
+                    ),
                     where(
-                        "ref
+                        "referral_code",
+                        "==",
+                        userData.referred_by
+                    )
+                );
+
+            const referralSnap =
+                await getDocs(
+                    referralQuery
+                );
+
+            if (
+                !referralSnap.empty
+            ) {
+
+                const referrerDoc =
+                    referralSnap.docs[0];
+
+                if (
+                    referrerDoc.id !==
+                    user.uid
+                ) {
+
+                    const bonus =
+                        Math.floor(
+                            task.coin *
+                                0.05
+                        );
+
+                    if (
+                        bonus > 0
+                    ) {
+
+                        await updateDoc(
+                            doc(
+                                db,
+                                "users",
+                                referrerDoc.id
+                            ),
+                            {
+
+                                coin:
+                                    increment(
+                                        bonus
+                                    )
+
+                            }
+                        );
+
+                        await addDoc(
+                            collection(
+                                db,
+                                "referral_bonus_history"
+                            ),
+                            {
+
+                                referrer_uid:
+                                    referrerDoc.id,
+
+                                referred_uid:
+                                    user.uid,
+
+                                referred_username:
+                                    userData.username,
+
+                                task_id:
+                                    taskId,
+
+                                task_coin:
+                                    task.coin,
+
+                                bonus_coin:
+                                    bonus,
+
+                                created_at:
+                                    new Date()
+                                        .toISOString()
+
+                            }
+                        );
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        const lastDate =
+            userData.last_active_date ||
+            "";
+
+        if (
+            lastDate !== today
+        ) {
+
+            let newActiveDays =
+                1;
+
+            if (
+                lastDate
+            ) {
+
+                const last =
+                    new Date(
+                        lastDate
+                    );
+
+                const current =
+                    new Date(
+                        today
+                    );
+
+                const diffDays =
+                    Math.floor(
+                        (current -
+                            last) /
+                            (1000 *
+                                60 *
+                                60 *
+                                24)
+                    );
+
+                if (
+                    diffDays ===
+                    1
+                ) {
+
+                    newActiveDays =
+                        (
+                            userData.active_days ||
+                            0
+                        ) + 1;
+
+                }
+
+            }
+
+            await updateDoc(
+                userRef,
+                {
+
+                    active_days:
+                        newActiveDays,
+
+                    last_active_date:
+                        today
+
+                }
+            );
+
+        }
+
+        await setDoc(
+            claimRef,
+            {
+
+                uid:
+                    user.uid,
+
+                task_id:
+                    taskId,
+
+                task_type:
+                    task.type,
+
+                last_claim_date:
+                    today,
+
+                claimed_at:
+                    new Date()
+                        .toISOString()
+
+            }
+        );
+
+        alert(
+            `${task.coin} Coins Added Successfully`
+        );
+
+        await loadTasks();
+
+    } catch (error) {
+
+        alert(
+            error.message
+        );
+
+    }
+
+};
