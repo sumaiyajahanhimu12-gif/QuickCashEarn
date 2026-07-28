@@ -16,33 +16,78 @@ import {
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
-        window.location.href = "../login.html";
-        return;
-    }
-
-    const userSnap =
-        await getDoc(
-            doc(db, "users", user.uid)
-        );
-
-    if (!userSnap.exists()) {
-
-        alert("User Not Found");
-
-        return;
-    }
-
-    if (userSnap.data().role !== "admin") {
-
-        alert("Access Denied");
 
         window.location.href =
-            "../dashboard.html";
+            "../login.html";
 
         return;
+
     }
 
-    loadWithdraws();
+    try {
+
+        const adminRef =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+        const adminSnap =
+            await getDoc(adminRef);
+
+        if (!adminSnap.exists()) {
+
+            alert("User Not Found");
+
+            return;
+
+        }
+
+        const adminData =
+            adminSnap.data();
+
+        // BAN PROTECTION
+
+        if (
+            adminData.status ===
+            "banned"
+        ) {
+
+            alert(
+                "Your Account Has Been Suspended"
+            );
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+        if (
+            adminData.role !==
+            "admin"
+        ) {
+
+            alert(
+                "Access Denied"
+            );
+
+            window.location.href =
+                "../dashboard.html";
+
+            return;
+
+        }
+
+        loadWithdraws();
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
 
 });
 
@@ -69,86 +114,63 @@ async function loadWithdraws() {
             "<p>No Withdraw Requests</p>";
 
         return;
+
     }
 
-    snapshot.forEach((requestDoc) => {
+    snapshot.forEach(
+        (requestDoc) => {
 
-        const data =
-            requestDoc.data();
+            const data =
+                requestDoc.data();
 
-        if (data.status !== "pending") {
-            return;
+            if (
+                data.status !==
+                "pending"
+            ) {
+
+                return;
+
+            }
+
+            container.innerHTML += `
+
+            <div class="task-card">
+
+                <h3>${data.username}</h3>
+
+                <p>Method: ${data.method}</p>
+
+                <p>Number: ${data.number}</p>
+
+                <p>Coins: ${data.coin}</p>
+
+                <p>Status: ${data.status}</p>
+
+                <button
+                onclick="approveWithdraw('${requestDoc.id}')">
+                Approve
+                </button>
+
+                <button
+                onclick="rejectWithdraw('${requestDoc.id}')">
+                Reject
+                </button>
+
+            </div>
+
+            <hr>
+
+            `;
+
         }
-
-        container.innerHTML += `
-
-        <div class="task-card">
-
-            <h3>${data.username}</h3>
-
-            <p>Method: ${data.method}</p>
-
-            <p>Number: ${data.number}</p>
-
-            <p>Coins: ${data.coin}</p>
-
-            <button
-            onclick="approveWithdraw('${requestDoc.id}')">
-            Approve
-            </button>
-
-            <button
-            onclick="rejectWithdraw('${requestDoc.id}')">
-            Reject
-            </button>
-
-        </div>
-
-        <hr>
-
-        `;
-    });
+    );
 
 }
 
 window.approveWithdraw =
-async function(requestId) {
-
-    try {
-
-        await updateDoc(
-            doc(
-                db,
-                "withdraw_requests",
-                requestId
-            ),
-            {
-
-                status: "approved",
-
-                approved_at:
-                    new Date()
-                    .toISOString()
-
-            }
-        );
-
-        alert(
-            "Withdraw Approved"
-        );
-
-        location.reload();
-
-    } catch (error) {
-
-        alert(error.message);
-
-    }
-
-};
-
-window.rejectWithdraw =
-async function(requestId) {
+async function (
+    requestId
+) {
 
     try {
 
@@ -164,7 +186,73 @@ async function(requestId) {
                 requestRef
             );
 
-        if (!requestSnap.exists()) {
+        if (
+            !requestSnap.exists()
+        ) {
+
+            alert(
+                "Request Not Found"
+            );
+
+            return;
+
+        }
+
+        await updateDoc(
+            requestRef,
+            {
+
+                status:
+                    "approved",
+
+                approved_at:
+                    new Date()
+                    .toISOString(),
+
+                approved_by:
+                    auth.currentUser.uid
+
+            }
+        );
+
+        alert(
+            "Withdraw Approved"
+        );
+
+        location.reload();
+
+    } catch (error) {
+
+        alert(
+            error.message
+        );
+
+    }
+
+};
+
+window.rejectWithdraw =
+async function (
+    requestId
+) {
+
+    try {
+
+        const requestRef =
+            doc(
+                db,
+                "withdraw_requests",
+                requestId
+            );
+
+        const requestSnap =
+            await getDoc(
+                requestRef
+            );
+
+        if (
+            !requestSnap.exists()
+        ) {
 
             alert(
                 "Request Not Found"
@@ -180,7 +268,17 @@ async function(requestId) {
         await updateDoc(
             requestRef,
             {
-                status: "rejected"
+
+                status:
+                    "rejected",
+
+                approved_at:
+                    new Date()
+                    .toISOString(),
+
+                approved_by:
+                    auth.currentUser.uid
+
             }
         );
 
@@ -191,10 +289,12 @@ async function(requestId) {
                 requestData.uid
             ),
             {
+
                 coin:
-                increment(
-                    requestData.coin
-                )
+                    increment(
+                        requestData.coin
+                    )
+
             }
         );
 
@@ -206,7 +306,9 @@ async function(requestId) {
 
     } catch (error) {
 
-        alert(error.message);
+        alert(
+            error.message
+        );
 
     }
 
