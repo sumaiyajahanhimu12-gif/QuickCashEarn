@@ -1,14 +1,17 @@
 import { auth, db } from "./firebase.js";
 
 import {
-    onAuthStateChanged
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
     collection,
     getDocs,
     query,
-    where
+    where,
+    doc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 onAuthStateChanged(auth, async (user) => {
@@ -21,7 +24,51 @@ onAuthStateChanged(auth, async (user) => {
 
     }
 
-    loadHistory(user.uid);
+    try {
+
+        const userRef =
+            doc(db, "users", user.uid);
+
+        const userSnap =
+            await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+
+            alert("User not found");
+
+            await signOut(auth);
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+        const userData =
+            userSnap.data();
+
+        // BAN PROTECTION
+        if (userData.status === "banned") {
+
+            alert("Your Account Has Been Suspended");
+
+            await signOut(auth);
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+        loadHistory(user.uid);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
 
 });
 
@@ -123,4 +170,4 @@ async function loadHistory(uid) {
 
     });
 
-      }
+}
