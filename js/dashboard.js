@@ -44,9 +44,13 @@ onAuthStateChanged(auth, async (user) => {
             userSnap.data();
 
         // BAN PROTECTION
+
         if (data.status === "banned") {
 
-            alert("Your Account Has Been Suspended");
+            alert(
+                "Your Account Has Been Suspended\n\nReason:\n" +
+                (data.ban_reason || "Policy Violation")
+            );
 
             await signOut(auth);
 
@@ -84,7 +88,20 @@ onAuthStateChanged(auth, async (user) => {
             ? "Verified ✅"
             : "Not Verified ❌";
 
+        const statusElement =
+            document.getElementById(
+                "accountStatus"
+            );
+
+        if (statusElement) {
+
+            statusElement.innerText =
+                data.status || "active";
+
+        }
+
         // ADMIN PANEL BUTTON
+
         if (data.role === "admin") {
 
             const adminBtn =
@@ -111,24 +128,31 @@ onAuthStateChanged(auth, async (user) => {
 
 });
 
-document.getElementById(
-    "logoutBtn"
-).addEventListener(
-    "click",
-    async () => {
+const logoutBtn =
+    document.getElementById(
+        "logoutBtn"
+    );
 
-        try {
+if (logoutBtn) {
 
-            await signOut(auth);
+    logoutBtn.addEventListener(
+        "click",
+        async () => {
 
-            window.location.href =
-                "login.html";
+            try {
 
-        } catch (error) {
+                await signOut(auth);
 
-            alert(error.message);
+                window.location.href =
+                    "login.html";
+
+            } catch (error) {
+
+                alert(error.message);
+
+            }
 
         }
+    );
 
-    }
-);
+}
