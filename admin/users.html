@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>User Management</h1>
+
+    <input
+    type="text"
+    id="searchUser"
+    placeholder="Search Username">
+
+    <button onclick="loadUsers()">
+        Search
+    </button>
+
+    <hr>
+
+    <div id="usersContainer">
+
+        Loading Users...
+
+    </div>
+
+    <br>
+
+    <button
+    onclick="window.location.href='dashboard.html'">
+        Back To Admin Dashboard
+    </button>
+
+</div>
+
+<script type="module" src="users.js"></script>
+
+</body>
+</html>
