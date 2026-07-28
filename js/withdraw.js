@@ -23,32 +23,55 @@ onAuthStateChanged(auth, async (user) => {
     if (!user) {
 
         window.location.href = "login.html";
-
         return;
 
     }
 
-    const userRef =
-        doc(db, "users", user.uid);
+    try {
 
-    const userSnap =
-        await getDoc(userRef);
+        const userRef =
+            doc(db, "users", user.uid);
 
-    if (!userSnap.exists()) {
+        const userSnap =
+            await getDoc(userRef);
 
-        alert("User not found");
+        if (!userSnap.exists()) {
 
-        return;
+            alert("User not found");
+            return;
+
+        }
+
+        currentUserData =
+            userSnap.data();
+
+        // BAN PROTECTION
+
+        if (
+            currentUserData.status === "banned"
+        ) {
+
+            alert(
+                "Your Account Has Been Suspended"
+            );
+
+            window.location.href =
+                "dashboard.html";
+
+            return;
+
+        }
+
+        document.getElementById(
+            "coinBalance"
+        ).innerText =
+            currentUserData.coin || 0;
+
+    } catch (error) {
+
+        alert(error.message);
 
     }
-
-    currentUserData =
-        userSnap.data();
-
-    document.getElementById(
-        "coinBalance"
-    ).innerText =
-        currentUserData.coin || 0;
 
 });
 
@@ -62,12 +85,54 @@ window.submitWithdraw = async function () {
         if (!user) {
 
             alert("Login Required");
+            return;
+
+        }
+
+        // LIVE USER CHECK
+
+        const latestUserRef =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+        const latestUserSnap =
+            await getDoc(
+                latestUserRef
+            );
+
+        if (
+            !latestUserSnap.exists()
+        ) {
+
+            alert(
+                "User Not Found"
+            );
 
             return;
 
         }
 
-        // Pending Withdraw Check
+        const latestUserData =
+            latestUserSnap.data();
+
+        // BAN PROTECTION
+
+        if (
+            latestUserData.status === "banned"
+        ) {
+
+            alert(
+                "Your Account Has Been Suspended"
+            );
+
+            return;
+
+        }
+
+        // PENDING REQUEST CHECK
 
         const pendingQuery =
             query(
@@ -129,7 +194,10 @@ window.submitWithdraw = async function () {
 
         }
 
-        if (!amount || amount < 50000) {
+        if (
+            !amount ||
+            amount < 50000
+        ) {
 
             alert(
                 "Minimum Withdraw 50000 Coins"
@@ -140,7 +208,7 @@ window.submitWithdraw = async function () {
         }
 
         if (
-            currentUserData.coin < amount
+            latestUserData.coin < amount
         ) {
 
             alert(
@@ -151,7 +219,9 @@ window.submitWithdraw = async function () {
 
         }
 
-        if (!user.emailVerified) {
+        if (
+            !user.emailVerified
+        ) {
 
             alert(
                 "Verify Email First"
@@ -162,8 +232,7 @@ window.submitWithdraw = async function () {
         }
 
         if (
-            (currentUserData.active_days || 0)
-            < 14
+            (latestUserData.active_days || 0) < 14
         ) {
 
             alert(
@@ -174,14 +243,31 @@ window.submitWithdraw = async function () {
 
         }
 
-        // Referral Validation
+        // REFERRAL CODE CHECK
+
+        if (
+            !latestUserData.referral_code
+        ) {
+
+            alert(
+                "Referral Code Missing"
+            );
+
+            return;
+
+        }
+
+        // REFERRAL VALIDATION
 
         const myCode =
-            currentUserData.referral_code;
+            latestUserData.referral_code;
 
         const referralsQuery =
             query(
-                collection(db, "users"),
+                collection(
+                    db,
+                    "users"
+                ),
                 where(
                     "referred_by",
                     "==",
@@ -249,7 +335,7 @@ window.submitWithdraw = async function () {
 
         }
 
-        // Date Check
+        // DATE VALIDATION
 
         const today =
             new Date();
@@ -270,7 +356,7 @@ window.submitWithdraw = async function () {
 
         }
 
-        // Create Withdraw Request
+        // CREATE WITHDRAW REQUEST
 
         await addDoc(
             collection(
@@ -282,7 +368,7 @@ window.submitWithdraw = async function () {
                 uid: user.uid,
 
                 username:
-                    currentUserData.username,
+                    latestUserData.username,
 
                 method: method,
 
@@ -303,19 +389,46 @@ window.submitWithdraw = async function () {
             }
         );
 
-        // Deduct Coins
+        // WITHDRAW HISTORY
 
-        await updateDoc(
-            doc(
+        await addDoc(
+            collection(
                 db,
-                "users",
-                user.uid
+                "withdraw_history"
             ),
             {
+
+                uid: user.uid,
+
+                username:
+                    latestUserData.username,
+
+                method: method,
+
+                number: number,
+
+                coin: amount,
+
+                status: "pending",
+
+                created_at:
+                    new Date()
+                    .toISOString()
+
+            }
+        );
+
+        // DEDUCT COINS
+
+        await updateDoc(
+            latestUserRef,
+            {
+
                 coin:
                 increment(
                     -amount
                 )
+
             }
         );
 
@@ -327,6 +440,8 @@ window.submitWithdraw = async function () {
             "dashboard.html";
 
     } catch (error) {
+
+        console.error(error);
 
         alert(error.message);
 
