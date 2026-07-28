@@ -67,6 +67,8 @@ window.submitWithdraw = async function () {
 
         }
 
+        // Pending Withdraw Check
+
         const pendingQuery =
             query(
                 collection(
@@ -149,7 +151,7 @@ window.submitWithdraw = async function () {
 
         }
 
-        if (!auth.currentUser.emailVerified) {
+        if (!user.emailVerified) {
 
             alert(
                 "Verify Email First"
@@ -172,6 +174,83 @@ window.submitWithdraw = async function () {
 
         }
 
+        // Referral Validation
+
+        const myCode =
+            currentUserData.referral_code;
+
+        const referralsQuery =
+            query(
+                collection(db, "users"),
+                where(
+                    "referred_by",
+                    "==",
+                    myCode
+                )
+            );
+
+        const referralsSnap =
+            await getDocs(
+                referralsQuery
+            );
+
+        const totalReferrals =
+            referralsSnap.size;
+
+        if (
+            totalReferrals < 10
+        ) {
+
+            alert(
+                "Minimum 10 Referrals Required"
+            );
+
+            return;
+
+        }
+
+        let referralCoins = [];
+
+        referralsSnap.forEach(
+            (docSnap) => {
+
+                const data =
+                    docSnap.data();
+
+                referralCoins.push(
+                    data.coin || 0
+                );
+
+            }
+        );
+
+        referralCoins.sort(
+            (a, b) => b - a
+        );
+
+        const top10Coins =
+            referralCoins
+            .slice(0, 10)
+            .reduce(
+                (sum, coin) =>
+                    sum + coin,
+                0
+            );
+
+        if (
+            top10Coins < 100000
+        ) {
+
+            alert(
+                "Top 10 Referral Coins must be at least 100000"
+            );
+
+            return;
+
+        }
+
+        // Date Check
+
         const today =
             new Date();
 
@@ -190,6 +269,8 @@ window.submitWithdraw = async function () {
             return;
 
         }
+
+        // Create Withdraw Request
 
         await addDoc(
             collection(
@@ -222,6 +303,8 @@ window.submitWithdraw = async function () {
             }
         );
 
+        // Deduct Coins
+
         await updateDoc(
             doc(
                 db,
@@ -229,17 +312,15 @@ window.submitWithdraw = async function () {
                 user.uid
             ),
             {
-
                 coin:
                 increment(
                     -amount
                 )
-
             }
         );
 
         alert(
-            "Withdraw Request Submitted"
+            "Withdraw Request Submitted Successfully"
         );
 
         window.location.href =
