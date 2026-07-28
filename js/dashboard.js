@@ -43,6 +43,19 @@ onAuthStateChanged(auth, async (user) => {
         const data =
             userSnap.data();
 
+        // BAN PROTECTION
+        if (data.status === "banned") {
+
+            alert("Your Account Has Been Suspended");
+
+            await signOut(auth);
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
         document.getElementById(
             "welcomeText"
         ).innerText =
@@ -71,15 +84,20 @@ onAuthStateChanged(auth, async (user) => {
             ? "Verified ✅"
             : "Not Verified ❌";
 
-        // Admin Panel Button Show
-        if (
-            data.role === "admin"
-        ) {
+        // ADMIN PANEL BUTTON
+        if (data.role === "admin") {
 
-            document.getElementById(
-                "adminPanelBtn"
-            ).style.display =
-                "inline-block";
+            const adminBtn =
+                document.getElementById(
+                    "adminPanelBtn"
+                );
+
+            if (adminBtn) {
+
+                adminBtn.style.display =
+                    "inline-block";
+
+            }
 
         }
 
