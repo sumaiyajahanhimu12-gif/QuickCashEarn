@@ -3,13 +3,15 @@ import { auth, db } from "./firebase.js";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    sendEmailVerification
+    sendEmailVerification,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
     doc,
     setDoc,
     updateDoc,
+    getDoc,
     collection,
     query,
     where,
@@ -161,24 +163,21 @@ window.registerUser = async function () {
 
                 active_days: 0,
 
-                email_verified:
-                    false,
+                email_verified: false,
 
-                telegram_verified:
-                    false,
+                telegram_verified: false,
 
                 role: "user",
+
+                status: "active",
+
+                ban_reason: "",
 
                 created_at:
                     new Date()
                     .toISOString()
 
             }
-        );
-
-        alert(
-            "USER UID:\n" +
-            user.uid
         );
 
         alert(
@@ -232,14 +231,47 @@ window.loginUser = async function () {
         const user =
             userCredential.user;
 
-        await user.reload();
-
         const userRef =
             doc(
                 db,
                 "users",
                 user.uid
             );
+
+        const userSnap =
+            await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+
+            await signOut(auth);
+
+            alert("User data not found");
+
+            return;
+
+        }
+
+        const userData =
+            userSnap.data();
+
+        // BAN CHECK
+
+        if (
+            userData.status === "banned"
+        ) {
+
+            await signOut(auth);
+
+            alert(
+                "Your account has been suspended.\n\nReason:\n" +
+                (userData.ban_reason || "Policy Violation")
+            );
+
+            return;
+
+        }
+
+        await user.reload();
 
         if (
             user.emailVerified
