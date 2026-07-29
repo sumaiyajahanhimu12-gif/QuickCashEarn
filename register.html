@@ -26,6 +26,15 @@
 
     <br><br>
 
+    <!-- NEW FIELD -->
+    <input
+    type="text"
+    id="deviceId"
+    placeholder="Device ID"
+    readonly>
+
+    <br><br>
+
     <input
     type="email"
     id="email"
@@ -59,6 +68,34 @@
     </p>
 
 </div>
+
+<script>
+let deviceId = localStorage.getItem("qce_device_id");
+
+if (!deviceId) {
+    deviceId =
+        "DEV-" +
+        Date.now() +
+        "-" +
+        Math.random()
+        .toString(36)
+        .substring(2, 12);
+
+    localStorage.setItem(
+        "qce_device_id",
+        deviceId
+    );
+}
+
+window.addEventListener(
+    "load",
+    () => {
+        document.getElementById(
+            "deviceId"
+        ).value = deviceId;
+    }
+);
+</script>
 
 <script type="module" src="js/auth.js"></script>
 
