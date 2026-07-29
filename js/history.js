@@ -19,7 +19,6 @@ onAuthStateChanged(auth, async (user) => {
     if (!user) {
 
         window.location.href = "login.html";
-
         return;
 
     }
@@ -38,7 +37,8 @@ onAuthStateChanged(auth, async (user) => {
 
             await signOut(auth);
 
-            window.location.href = "login.html";
+            window.location.href =
+                "login.html";
 
             return;
 
@@ -47,20 +47,24 @@ onAuthStateChanged(auth, async (user) => {
         const userData =
             userSnap.data();
 
-        // BAN PROTECTION
-        if (userData.status === "banned") {
+        if (
+            userData.status === "banned"
+        ) {
 
-            alert("Your Account Has Been Suspended");
+            alert(
+                "Your Account Has Been Suspended"
+            );
 
             await signOut(auth);
 
-            window.location.href = "login.html";
+            window.location.href =
+                "login.html";
 
             return;
 
         }
 
-        loadHistory(user.uid);
+        await loadMyHistory(user.uid);
 
     } catch (error) {
 
@@ -72,7 +76,7 @@ onAuthStateChanged(auth, async (user) => {
 
 });
 
-async function loadHistory(uid) {
+async function loadMyHistory(uid) {
 
     const container =
         document.getElementById(
@@ -99,40 +103,149 @@ async function loadHistory(uid) {
             historyQuery
         );
 
+    container.innerHTML += `
+
+    <h2>
+        My Withdraw History
+    </h2>
+
+    `;
+
     if (historySnap.empty) {
 
-        container.innerHTML =
+        container.innerHTML +=
             "<p>No Withdraw History Found</p>";
 
-        return;
+    } else {
+
+        historySnap.forEach((docSnap) => {
+
+            const data =
+                docSnap.data();
+
+            let statusText = "";
+
+            if (
+                data.status === "approved"
+            ) {
+
+                statusText =
+                    "✅ Approved";
+
+            } else if (
+                data.status === "rejected"
+            ) {
+
+                statusText =
+                    "❌ Rejected";
+
+            } else {
+
+                statusText =
+                    "⏳ Pending";
+
+            }
+
+            container.innerHTML += `
+
+            <div class="task-card">
+
+                <h3>
+                    ${data.coin} Coins
+                </h3>
+
+                <p>
+                    Method:
+                    ${data.method}
+                </p>
+
+                <p>
+                    Number:
+                    ${data.number}
+                </p>
+
+                <p>
+                    Status:
+                    ${statusText}
+                </p>
+
+                <p>
+                    Date:
+                    ${data.created_at || ""}
+                </p>
+
+            </div>
+
+            <hr>
+
+            `;
+
+        });
 
     }
 
-    historySnap.forEach((docSnap) => {
+    await loadPublicProofs(container);
+
+}
+
+async function loadPublicProofs(container) {
+
+    const withdrawSnap =
+        await getDocs(
+            collection(
+                db,
+                "withdraw_requests"
+            )
+        );
+
+    container.innerHTML += `
+
+    <br>
+    <br>
+
+    <h2>
+        Recent Payment Proofs
+    </h2>
+
+    `;
+
+    let found = false;
+
+    withdrawSnap.forEach((docSnap) => {
 
         const data =
             docSnap.data();
 
-        let statusText = "";
-
         if (
-            data.status === "approved"
+            data.status !== "approved"
         ) {
+            return;
+        }
 
-            statusText =
-                "✅ Approved";
+        found = true;
 
-        } else if (
-            data.status === "rejected"
-        ) {
+        let maskedNumber = "";
 
-            statusText =
-                "❌ Rejected";
+        if (data.number) {
 
-        } else {
+            const num =
+                data.number.toString();
 
-            statusText =
-                "⏳ Pending";
+            if (num.length >= 11) {
+
+                maskedNumber =
+                    num.substring(0, 5) +
+                    "****" +
+                    num.substring(
+                        num.length - 2
+                    );
+
+            } else {
+
+                maskedNumber =
+                    "Hidden";
+
+            }
 
         }
 
@@ -140,7 +253,9 @@ async function loadHistory(uid) {
 
         <div class="task-card">
 
-            <h3>${data.coin} Coins</h3>
+            <h3>
+                ${data.username}
+            </h3>
 
             <p>
                 Method:
@@ -149,17 +264,17 @@ async function loadHistory(uid) {
 
             <p>
                 Number:
-                ${data.number}
+                ${maskedNumber}
+            </p>
+
+            <p>
+                Amount:
+                ${data.coin} Coins
             </p>
 
             <p>
                 Status:
-                ${statusText}
-            </p>
-
-            <p>
-                Date:
-                ${data.created_at}
+                ✅ Paid
             </p>
 
         </div>
@@ -169,5 +284,12 @@ async function loadHistory(uid) {
         `;
 
     });
+
+    if (!found) {
+
+        container.innerHTML +=
+            "<p>No Payment Proof Available Yet</p>";
+
+    }
 
 }
