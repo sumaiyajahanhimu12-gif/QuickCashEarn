@@ -45,8 +45,6 @@ onAuthStateChanged(auth, async (user) => {
         currentUserData =
             userSnap.data();
 
-        // BAN PROTECTION
-
         if (
             currentUserData.status === "banned"
         ) {
@@ -89,8 +87,6 @@ window.submitWithdraw = async function () {
 
         }
 
-        // LIVE USER CHECK
-
         const latestUserRef =
             doc(
                 db,
@@ -118,8 +114,6 @@ window.submitWithdraw = async function () {
         const latestUserData =
             latestUserSnap.data();
 
-        // BAN PROTECTION
-
         if (
             latestUserData.status === "banned"
         ) {
@@ -131,8 +125,6 @@ window.submitWithdraw = async function () {
             return;
 
         }
-
-        // PENDING REQUEST CHECK
 
         const pendingQuery =
             query(
@@ -178,7 +170,7 @@ window.submitWithdraw = async function () {
             ).value.trim();
 
         const amount =
-            parseInt(
+            Number(
                 document.getElementById(
                     "amount"
                 ).value
@@ -195,12 +187,24 @@ window.submitWithdraw = async function () {
         }
 
         if (
-            !amount ||
+            !Number.isInteger(amount) ||
             amount < 50000
         ) {
 
             alert(
                 "Minimum Withdraw 50000 Coins"
+            );
+
+            return;
+
+        }
+
+        if (
+            amount <= 0
+        ) {
+
+            alert(
+                "Invalid Withdraw Amount"
             );
 
             return;
@@ -243,8 +247,6 @@ window.submitWithdraw = async function () {
 
         }
 
-        // REFERRAL CODE CHECK
-
         if (
             !latestUserData.referral_code
         ) {
@@ -256,8 +258,6 @@ window.submitWithdraw = async function () {
             return;
 
         }
-
-        // REFERRAL VALIDATION
 
         const myCode =
             latestUserData.referral_code;
@@ -303,9 +303,15 @@ window.submitWithdraw = async function () {
                 const data =
                     docSnap.data();
 
-                referralCoins.push(
-                    data.coin || 0
-                );
+                if (
+                    data.referral_code !== myCode
+                ) {
+
+                    referralCoins.push(
+                        data.coin || 0
+                    );
+
+                }
 
             }
         );
@@ -335,8 +341,6 @@ window.submitWithdraw = async function () {
 
         }
 
-        // DATE VALIDATION
-
         const today =
             new Date();
 
@@ -355,8 +359,6 @@ window.submitWithdraw = async function () {
             return;
 
         }
-
-        // CREATE WITHDRAW REQUEST
 
         await addDoc(
             collection(
@@ -389,8 +391,6 @@ window.submitWithdraw = async function () {
             }
         );
 
-        // WITHDRAW HISTORY
-
         await addDoc(
             collection(
                 db,
@@ -418,16 +418,14 @@ window.submitWithdraw = async function () {
             }
         );
 
-        // DEDUCT COINS
-
         await updateDoc(
             latestUserRef,
             {
 
                 coin:
-                increment(
-                    -amount
-                )
+                    increment(
+                        -amount
+                    )
 
             }
         );
