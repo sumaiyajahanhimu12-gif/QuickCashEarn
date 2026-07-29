@@ -17,34 +17,24 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
 
-        window.location.href =
-            "../login.html";
-
+        window.location.href = "../login.html";
         return;
 
     }
 
     const adminSnap =
         await getDoc(
-            doc(
-                db,
-                "users",
-                user.uid
-            )
+            doc(db, "users", user.uid)
         );
 
     if (!adminSnap.exists()) {
 
         alert("User Not Found");
-
         return;
 
     }
 
-    if (
-        adminSnap.data().role !==
-        "admin"
-    ) {
+    if (adminSnap.data().role !== "admin") {
 
         alert("Access Denied");
 
@@ -59,8 +49,7 @@ onAuthStateChanged(auth, async (user) => {
 
 });
 
-window.loadUsers =
-async function () {
+window.loadUsers = async function () {
 
     const container =
         document.getElementById(
@@ -80,162 +69,129 @@ async function () {
 
     const snapshot =
         await getDocs(
-            collection(
-                db,
-                "users"
-            )
+            collection(db, "users")
         );
 
-    snapshot.forEach(
-        (userDoc) => {
+    snapshot.forEach((userDoc) => {
 
-            const data =
-                userDoc.data();
+        const data =
+            userDoc.data();
 
-            if (
-                keyword &&
-                !data.username
-                    .toLowerCase()
-                    .includes(keyword)
-            ) {
-                return;
-            }
+        if (
+            keyword &&
+            !data.username
+                .toLowerCase()
+                .includes(keyword)
+        ) {
+            return;
+        }
 
-            container.innerHTML += `
+        container.innerHTML += `
 
-            <div class="task-card">
+        <div class="task-card">
 
-                <h3>${data.username}</h3>
+            <h3>${data.username}</h3>
 
-                <p>Email: ${data.email}</p>
+            <p>Email: ${data.email}</p>
 
-                <p>Coin: ${data.coin || 0}</p>
+            <p>Coin: ${data.coin || 0}</p>
 
-                <p>Active Days: ${data.active_days || 0}</p>
+            <p>Active Days: ${data.active_days || 0}</p>
 
-                <p>Status: ${data.status || "active"}</p>
+            <p>Status: ${data.status || "active"}</p>
 
-                <button
-                onclick="addCoin('${userDoc.id}')">
+            <p>Role: ${data.role || "user"}</p>
+
+            <button onclick="addCoin('${userDoc.id}')">
                 +1000 Coin
-                </button>
+            </button>
 
-                <button
-                onclick="deductCoin('${userDoc.id}')">
+            <button onclick="deductCoin('${userDoc.id}')">
                 -1000 Coin
-                </button>
+            </button>
 
-                <button
-                onclick="banUser('${userDoc.id}')">
+            <button onclick="banUser('${userDoc.id}')">
                 Ban
-                </button>
+            </button>
 
-                <button
-                onclick="unbanUser('${userDoc.id}')">
+            <button onclick="unbanUser('${userDoc.id}')">
                 Unban
-                </button>
+            </button>
 
-            </div>
+        </div>
 
-            <hr>
+        <hr>
 
-            `;
+        `;
 
-        });
+    });
 
 };
 
-window.addCoin =
-async function(uid) {
+window.addCoin = async function(uid) {
 
     await updateDoc(
-        doc(
-            db,
-            "users",
-            uid
-        ),
+        doc(db, "users", uid),
         {
-            coin:
-            increment(
-                1000
-            )
+            coin: increment(1000)
         }
     );
 
-    alert(
-        "1000 Coins Added"
-    );
+    alert("1000 Coins Added");
 
     loadUsers();
 
 };
 
-window.deductCoin =
-async function(uid) {
+window.deductCoin = async function(uid) {
 
     await updateDoc(
-        doc(
-            db,
-            "users",
-            uid
-        ),
+        doc(db, "users", uid),
         {
-            coin:
-            increment(
-                -1000
-            )
+            coin: increment(-1000)
         }
     );
 
-    alert(
-        "1000 Coins Deducted"
-    );
+    alert("1000 Coins Deducted");
 
     loadUsers();
 
 };
 
-window.banUser =
-async function(uid) {
+window.banUser = async function(uid) {
+
+    const reason =
+        prompt(
+            "Enter Ban Reason"
+        );
+
+    if (!reason) return;
 
     await updateDoc(
-        doc(
-            db,
-            "users",
-            uid
-        ),
+        doc(db, "users", uid),
         {
-            status:
-            "banned"
+            status: "banned",
+            ban_reason: reason
         }
     );
 
-    alert(
-        "User Banned"
-    );
+    alert("User Banned");
 
     loadUsers();
 
 };
 
-window.unbanUser =
-async function(uid) {
+window.unbanUser = async function(uid) {
 
     await updateDoc(
-        doc(
-            db,
-            "users",
-            uid
-        ),
+        doc(db, "users", uid),
         {
-            status:
-            "active"
+            status: "active",
+            ban_reason: ""
         }
     );
 
-    alert(
-        "User Unbanned"
-    );
+    alert("User Unbanned");
 
     loadUsers();
 
