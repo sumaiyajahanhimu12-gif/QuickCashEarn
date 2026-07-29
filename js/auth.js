@@ -49,8 +49,47 @@ window.registerUser = async function () {
 
     try {
 
+        let deviceId =
+            localStorage.getItem(
+                "qce_device_id"
+            );
+
+        if (!deviceId) {
+
+            deviceId =
+                crypto.randomUUID();
+
+            localStorage.setItem(
+                "qce_device_id",
+                deviceId
+            );
+
+        }
+
         const usersRef =
             collection(db, "users");
+
+        const deviceSnap =
+            await getDocs(
+                query(
+                    usersRef,
+                    where(
+                        "device_id",
+                        "==",
+                        deviceId
+                    )
+                )
+            );
+
+        if (!deviceSnap.empty) {
+
+            alert(
+                "Only One Account Allowed Per Device"
+            );
+
+            return;
+
+        }
 
         const usernameSnap =
             await getDocs(
@@ -66,7 +105,10 @@ window.registerUser = async function () {
 
         if (!usernameSnap.empty) {
 
-            alert("Username already exists");
+            alert(
+                "Username already exists"
+            );
+
             return;
 
         }
@@ -85,7 +127,10 @@ window.registerUser = async function () {
 
         if (!telegramSnap.empty) {
 
-            alert("Telegram ID already registered");
+            alert(
+                "Telegram ID already registered"
+            );
+
             return;
 
         }
@@ -106,7 +151,10 @@ window.registerUser = async function () {
 
             if (referralSnap.empty) {
 
-                alert("Invalid Referral Code");
+                alert(
+                    "Invalid Referral Code"
+                );
+
                 return;
 
             }
@@ -149,6 +197,9 @@ window.registerUser = async function () {
 
                 telegram_id:
                     telegramId,
+
+                device_id:
+                    deviceId,
 
                 email:
                     email,
@@ -245,7 +296,9 @@ window.loginUser = async function () {
 
             await signOut(auth);
 
-            alert("User data not found");
+            alert(
+                "User data not found"
+            );
 
             return;
 
@@ -254,17 +307,19 @@ window.loginUser = async function () {
         const userData =
             userSnap.data();
 
-        // BAN CHECK
-
         if (
-            userData.status === "banned"
+            userData.status ===
+            "banned"
         ) {
 
             await signOut(auth);
 
             alert(
                 "Your account has been suspended.\n\nReason:\n" +
-                (userData.ban_reason || "Policy Violation")
+                (
+                    userData.ban_reason ||
+                    "Policy Violation"
+                )
             );
 
             return;
@@ -287,7 +342,9 @@ window.loginUser = async function () {
 
         }
 
-        alert("Login Successful");
+        alert(
+            "Login Successful"
+        );
 
         window.location.href =
             "dashboard.html";
