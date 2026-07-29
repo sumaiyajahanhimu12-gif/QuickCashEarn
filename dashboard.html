@@ -10,31 +10,35 @@
 
 <div class="container">
 
-    <h1>QuickCashEarn</h1>
+    <h1>💰 QuickCashEarn</h1>
 
     <h2 id="welcomeText">Loading...</h2>
 
     <hr>
 
-    <p>
-        <strong>Coin Balance:</strong>
-        <span id="coinBalance">0</span>
-    </p>
+    <div class="task-card">
 
-    <p>
-        <strong>Referral Code:</strong>
-        <span id="referralCode">Loading...</span>
-    </p>
+        <p>
+            <strong>💰 Coin Balance:</strong><br>
+            <span id="coinBalance">0</span>
+        </p>
 
-    <p>
-        <strong>Consecutive Active Days:</strong>
-        <span id="activeDays">0</span>
-    </p>
+        <p>
+            <strong>👥 Referral Code:</strong><br>
+            <span id="referralCode">Loading...</span>
+        </p>
 
-    <p>
-        <strong>Email Verification:</strong>
-        <span id="emailStatus">Checking...</span>
-    </p>
+        <p>
+            <strong>🔥 Consecutive Active Days:</strong><br>
+            <span id="activeDays">0</span>
+        </p>
+
+        <p>
+            <strong>📧 Email Verification:</strong><br>
+            <span id="emailStatus">Checking...</span>
+        </p>
+
+    </div>
 
     <hr>
 
@@ -42,30 +46,21 @@
         📋 View Tasks
     </button>
 
-    <br><br>
-
     <button onclick="window.location.href='referrals.html'">
         👥 My Referrals
     </button>
-
-    <br><br>
 
     <button onclick="window.location.href='withdraw.html'">
         💰 Withdraw
     </button>
 
-    <br><br>
-
     <button onclick="window.location.href='history.html'">
         📜 Withdraw History
     </button>
 
-    <br><br>
-
     <button
     id="adminPanelBtn"
-    style="display:none;"
-    onclick="window.location.href='admin/dashboard.html'">
+    style="display:none;background:#ef4444;">
         ⚙️ Admin Panel
     </button>
 
@@ -78,6 +73,15 @@
 </div>
 
 <script type="module" src="js/dashboard.js"></script>
+
+<script>
+document
+.getElementById("adminPanelBtn")
+.addEventListener("click", () => {
+    window.location.href =
+    "admin/dashboard.html";
+});
+</script>
 
 </body>
 </html>
