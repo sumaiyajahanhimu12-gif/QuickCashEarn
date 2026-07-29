@@ -49,6 +49,8 @@ window.registerUser = async function () {
 
     try {
 
+        // DEVICE ID
+
         let deviceId =
             localStorage.getItem(
                 "qce_device_id"
@@ -68,6 +70,8 @@ window.registerUser = async function () {
 
         const usersRef =
             collection(db, "users");
+
+        // ONE DEVICE = ONE ACCOUNT
 
         const deviceSnap =
             await getDocs(
@@ -91,6 +95,8 @@ window.registerUser = async function () {
 
         }
 
+        // USERNAME CHECK
+
         const usernameSnap =
             await getDocs(
                 query(
@@ -106,12 +112,14 @@ window.registerUser = async function () {
         if (!usernameSnap.empty) {
 
             alert(
-                "Username already exists"
+                "Username Already Exists"
             );
 
             return;
 
         }
+
+        // TELEGRAM CHECK
 
         const telegramSnap =
             await getDocs(
@@ -128,12 +136,14 @@ window.registerUser = async function () {
         if (!telegramSnap.empty) {
 
             alert(
-                "Telegram ID already registered"
+                "Telegram ID Already Registered"
             );
 
             return;
 
         }
+
+        // REFERRAL CHECK
 
         if (referralCode) {
 
@@ -214,6 +224,8 @@ window.registerUser = async function () {
 
                 active_days: 0,
 
+                last_active_date: "",
+
                 email_verified: false,
 
                 telegram_verified: false,
@@ -232,7 +244,7 @@ window.registerUser = async function () {
         );
 
         alert(
-            "Registration Successful.\n\nVerification email sent."
+            "Registration Successful.\n\nVerification Email Sent."
         );
 
         window.location.href =
@@ -290,14 +302,16 @@ window.loginUser = async function () {
             );
 
         const userSnap =
-            await getDoc(userRef);
+            await getDoc(
+                userRef
+            );
 
         if (!userSnap.exists()) {
 
             await signOut(auth);
 
             alert(
-                "User data not found"
+                "User Data Not Found"
             );
 
             return;
@@ -307,6 +321,31 @@ window.loginUser = async function () {
         const userData =
             userSnap.data();
 
+        // DEVICE CHECK
+
+        const savedDeviceId =
+            localStorage.getItem(
+                "qce_device_id"
+            );
+
+        if (
+            userData.device_id &&
+            savedDeviceId &&
+            userData.device_id !== savedDeviceId
+        ) {
+
+            await signOut(auth);
+
+            alert(
+                "This Account Is Registered On Another Device"
+            );
+
+            return;
+
+        }
+
+        // BAN CHECK
+
         if (
             userData.status ===
             "banned"
@@ -315,7 +354,7 @@ window.loginUser = async function () {
             await signOut(auth);
 
             alert(
-                "Your account has been suspended.\n\nReason:\n" +
+                "Your Account Has Been Suspended\n\nReason:\n" +
                 (
                     userData.ban_reason ||
                     "Policy Violation"
