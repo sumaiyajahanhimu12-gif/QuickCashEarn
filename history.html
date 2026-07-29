@@ -1,35 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Withdraw History - QuickCashEarn</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body><div class="container"><div class="top-bar">
 
-<div class="container">
-
-    <h1>Withdraw History</h1>
-
-    <hr>
-
-    <div id="historyContainer">
-
-        Loading...
-
-    </div>
-
-    <br>
-
-    <button
+    <button class="back-btn"
     onclick="window.location.href='dashboard.html'">
-        Back To Dashboard
+        ← Dashboard
     </button>
 
 </div>
 
-<script type="module" src="js/history.js"></script>
+<h1>📜 Withdraw History</h1>
 
-</body>
+<p>
+    View all your withdraw requests and their status.
+</p>
+
+<hr>
+
+<div id="historyContainer">
+
+    <div class="task-card">
+        Loading Withdraw History...
+    </div>
+
+</div>
+
+<hr>
+
+<button
+onclick="window.location.href='withdraw.html'">
+    💰 New Withdraw
+</button>
+
+<button
+onclick="window.location.href='dashboard.html'">
+    🏠 Dashboard
+</button>
+
+</div><script type="module" src="js/history.js"></script></body>
 </html>
