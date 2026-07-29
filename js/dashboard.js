@@ -30,11 +30,12 @@ onAuthStateChanged(auth, async (user) => {
 
         if (!userSnap.exists()) {
 
-            alert("User data not found");
-
             await signOut(auth);
 
-            window.location.href = "login.html";
+            alert("User Data Not Found");
+
+            window.location.href =
+                "login.html";
 
             return;
 
@@ -43,22 +44,25 @@ onAuthStateChanged(auth, async (user) => {
         const data =
             userSnap.data();
 
-        // BAN PROTECTION
+        // BAN CHECK
 
         if (data.status === "banned") {
+
+            await signOut(auth);
 
             alert(
                 "Your Account Has Been Suspended\n\nReason:\n" +
                 (data.ban_reason || "Policy Violation")
             );
 
-            await signOut(auth);
-
-            window.location.href = "login.html";
+            window.location.href =
+                "login.html";
 
             return;
 
         }
+
+        // USER INFO
 
         document.getElementById(
             "welcomeText"
@@ -85,36 +89,35 @@ onAuthStateChanged(auth, async (user) => {
             "emailStatus"
         ).innerText =
             user.emailVerified
-            ? "Verified ✅"
-            : "Not Verified ❌";
+                ? "Verified ✅"
+                : "Not Verified ❌";
 
-        const statusElement =
+        const accountStatus =
             document.getElementById(
                 "accountStatus"
             );
 
-        if (statusElement) {
+        if (accountStatus) {
 
-            statusElement.innerText =
+            accountStatus.innerText =
                 data.status || "active";
 
         }
 
-        // ADMIN PANEL BUTTON
+        // ADMIN PANEL
 
-        if (data.role === "admin") {
+        const adminBtn =
+            document.getElementById(
+                "adminPanelBtn"
+            );
 
-            const adminBtn =
-                document.getElementById(
-                    "adminPanelBtn"
-                );
+        if (
+            adminBtn &&
+            data.role === "admin"
+        ) {
 
-            if (adminBtn) {
-
-                adminBtn.style.display =
-                    "inline-block";
-
-            }
+            adminBtn.style.display =
+                "inline-block";
 
         }
 
@@ -122,11 +125,16 @@ onAuthStateChanged(auth, async (user) => {
 
         console.error(error);
 
-        alert(error.message);
+        alert(
+            "Dashboard Error\n\n" +
+            error.message
+        );
 
     }
 
 });
+
+// LOGOUT
 
 const logoutBtn =
     document.getElementById(
