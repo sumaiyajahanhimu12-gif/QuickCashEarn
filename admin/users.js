@@ -13,6 +13,8 @@ import {
     increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+let currentAdminId = "";
+
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
@@ -22,30 +24,60 @@ onAuthStateChanged(auth, async (user) => {
 
     }
 
-    const adminSnap =
-        await getDoc(
-            doc(db, "users", user.uid)
-        );
+    try {
 
-    if (!adminSnap.exists()) {
+        currentAdminId = user.uid;
 
-        alert("User Not Found");
-        return;
+        const adminSnap =
+            await getDoc(
+                doc(db, "users", user.uid)
+            );
+
+        if (!adminSnap.exists()) {
+
+            alert("User Not Found");
+            return;
+
+        }
+
+        const adminData =
+            adminSnap.data();
+
+        if (
+            adminData.status === "banned"
+        ) {
+
+            alert(
+                "Your Account Has Been Suspended"
+            );
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+        if (
+            adminData.role !== "admin"
+        ) {
+
+            alert("Access Denied");
+
+            window.location.href =
+                "../dashboard.html";
+
+            return;
+
+        }
+
+        loadUsers();
+
+    } catch (error) {
+
+        alert(error.message);
 
     }
-
-    if (adminSnap.data().role !== "admin") {
-
-        alert("Access Denied");
-
-        window.location.href =
-            "../dashboard.html";
-
-        return;
-
-    }
-
-    loadUsers();
 
 });
 
@@ -130,69 +162,111 @@ window.loadUsers = async function () {
 
 window.addCoin = async function(uid) {
 
-    await updateDoc(
-        doc(db, "users", uid),
-        {
-            coin: increment(1000)
-        }
-    );
+    try {
 
-    alert("1000 Coins Added");
+        await updateDoc(
+            doc(db, "users", uid),
+            {
+                coin: increment(1000)
+            }
+        );
 
-    loadUsers();
+        alert("1000 Coins Added");
+
+        loadUsers();
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
 
 };
 
 window.deductCoin = async function(uid) {
 
-    await updateDoc(
-        doc(db, "users", uid),
-        {
-            coin: increment(-1000)
-        }
-    );
+    try {
 
-    alert("1000 Coins Deducted");
+        await updateDoc(
+            doc(db, "users", uid),
+            {
+                coin: increment(-1000)
+            }
+        );
 
-    loadUsers();
+        alert("1000 Coins Deducted");
+
+        loadUsers();
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
 
 };
 
 window.banUser = async function(uid) {
 
-    const reason =
-        prompt(
-            "Enter Ban Reason"
+    try {
+
+        if (uid === currentAdminId) {
+
+            alert(
+                "You Cannot Ban Yourself"
+            );
+
+            return;
+
+        }
+
+        const reason =
+            prompt(
+                "Enter Ban Reason"
+            );
+
+        if (!reason) return;
+
+        await updateDoc(
+            doc(db, "users", uid),
+            {
+                status: "banned",
+                ban_reason: reason
+            }
         );
 
-    if (!reason) return;
+        alert("User Banned");
 
-    await updateDoc(
-        doc(db, "users", uid),
-        {
-            status: "banned",
-            ban_reason: reason
-        }
-    );
+        loadUsers();
 
-    alert("User Banned");
+    } catch (error) {
 
-    loadUsers();
+        alert(error.message);
+
+    }
 
 };
 
 window.unbanUser = async function(uid) {
 
-    await updateDoc(
-        doc(db, "users", uid),
-        {
-            status: "active",
-            ban_reason: ""
-        }
-    );
+    try {
 
-    alert("User Unbanned");
+        await updateDoc(
+            doc(db, "users", uid),
+            {
+                status: "active",
+                ban_reason: ""
+            }
+        );
 
-    loadUsers();
+        alert("User Unbanned");
+
+        loadUsers();
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
 
 };
