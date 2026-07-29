@@ -3,7 +3,7 @@ body{
     padding:0;
     font-family:Arial,sans-serif;
     background:#0f172a;
-    color:white;
+    color:#ffffff;
     text-align:center;
 }
 
@@ -11,15 +11,23 @@ body{
     max-width:700px;
     margin:auto;
     padding:20px;
-    margin-top:50px;
+    margin-top:20px;
 }
 
 h1{
-    font-size:40px;
+    font-size:32px;
+    margin-bottom:15px;
+    color:#22c55e;
+}
+
+h2{
+    font-size:24px;
+    margin-bottom:10px;
 }
 
 p{
-    font-size:18px;
+    font-size:16px;
+    line-height:1.6;
 }
 
 input,
@@ -30,6 +38,9 @@ select{
     border:none;
     border-radius:8px;
     font-size:16px;
+    background:#ffffff;
+    color:#000000;
+    box-sizing:border-box;
 }
 
 button,
@@ -44,11 +55,14 @@ button,
     border-radius:8px;
     cursor:pointer;
     font-size:16px;
+    font-weight:bold;
+    transition:0.3s;
 }
 
 button:hover,
 .buttons a:hover{
     opacity:0.9;
+    transform:translateY(-2px);
 }
 
 .task-card{
@@ -56,12 +70,92 @@ button:hover,
     padding:15px;
     border-radius:10px;
     margin:10px 0;
+    box-shadow:0 0 10px rgba(0,0,0,0.25);
 }
 
 hr{
     border:1px solid #334155;
+    margin:20px 0;
 }
 
 #adminPanelBtn{
     background:#ef4444;
+}
+
+.back-btn{
+    display:inline-block;
+    margin-bottom:20px;
+    background:#3b82f6;
+}
+
+.logout-btn{
+    background:#ef4444;
+}
+
+.approve-btn{
+    background:#22c55e;
+}
+
+.reject-btn{
+    background:#ef4444;
+}
+
+.pause-btn{
+    background:#f59e0b;
+}
+
+.publish-btn{
+    background:#22c55e;
+}
+
+.delete-btn{
+    background:#dc2626;
+}
+
+.stats-box{
+    background:#1e293b;
+    padding:15px;
+    border-radius:10px;
+    margin:10px 0;
+}
+
+a{
+    color:#22c55e;
+    text-decoration:none;
+}
+
+a:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:768px){
+
+    .container{
+        width:95%;
+        padding:10px;
+        margin-top:10px;
+    }
+
+    h1{
+        font-size:28px;
+    }
+
+    h2{
+        font-size:22px;
+    }
+
+    p{
+        font-size:15px;
+    }
+
+    button,
+    .buttons a{
+        width:90%;
+        max-width:400px;
+    }
+
+    input,
+    select{
+        width:95%;
+    }
 }
