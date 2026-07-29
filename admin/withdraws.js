@@ -17,9 +17,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
 
-        window.location.href =
-            "../login.html";
-
+        window.location.href = "../login.html";
         return;
 
     }
@@ -27,11 +25,7 @@ onAuthStateChanged(auth, async (user) => {
     try {
 
         const adminRef =
-            doc(
-                db,
-                "users",
-                user.uid
-            );
+            doc(db, "users", user.uid);
 
         const adminSnap =
             await getDoc(adminRef);
@@ -39,7 +33,6 @@ onAuthStateChanged(auth, async (user) => {
         if (!adminSnap.exists()) {
 
             alert("User Not Found");
-
             return;
 
         }
@@ -47,12 +40,7 @@ onAuthStateChanged(auth, async (user) => {
         const adminData =
             adminSnap.data();
 
-        // BAN PROTECTION
-
-        if (
-            adminData.status ===
-            "banned"
-        ) {
+        if (adminData.status === "banned") {
 
             alert(
                 "Your Account Has Been Suspended"
@@ -65,14 +53,9 @@ onAuthStateChanged(auth, async (user) => {
 
         }
 
-        if (
-            adminData.role !==
-            "admin"
-        ) {
+        if (adminData.role !== "admin") {
 
-            alert(
-                "Access Denied"
-            );
+            alert("Access Denied");
 
             window.location.href =
                 "../dashboard.html";
@@ -117,60 +100,53 @@ async function loadWithdraws() {
 
     }
 
-    snapshot.forEach(
-        (requestDoc) => {
+    snapshot.forEach((requestDoc) => {
 
-            const data =
-                requestDoc.data();
+        const data =
+            requestDoc.data();
 
-            if (
-                data.status !==
-                "pending"
-            ) {
+        if (data.status !== "pending") {
 
-                return;
-
-            }
-
-            container.innerHTML += `
-
-            <div class="task-card">
-
-                <h3>${data.username}</h3>
-
-                <p>Method: ${data.method}</p>
-
-                <p>Number: ${data.number}</p>
-
-                <p>Coins: ${data.coin}</p>
-
-                <p>Status: ${data.status}</p>
-
-                <button
-                onclick="approveWithdraw('${requestDoc.id}')">
-                Approve
-                </button>
-
-                <button
-                onclick="rejectWithdraw('${requestDoc.id}')">
-                Reject
-                </button>
-
-            </div>
-
-            <hr>
-
-            `;
+            return;
 
         }
-    );
+
+        container.innerHTML += `
+
+        <div class="task-card">
+
+            <h3>${data.username}</h3>
+
+            <p>Method: ${data.method}</p>
+
+            <p>Number: ${data.number}</p>
+
+            <p>Coins: ${data.coin}</p>
+
+            <p>Status: ${data.status}</p>
+
+            <button
+            onclick="approveWithdraw('${requestDoc.id}')">
+            Approve
+            </button>
+
+            <button
+            onclick="rejectWithdraw('${requestDoc.id}')">
+            Reject
+            </button>
+
+        </div>
+
+        <hr>
+
+        `;
+
+    });
 
 }
 
 window.approveWithdraw =
-async function (
-    requestId
-) {
+async function (requestId) {
 
     try {
 
@@ -182,16 +158,24 @@ async function (
             );
 
         const requestSnap =
-            await getDoc(
-                requestRef
-            );
+            await getDoc(requestRef);
+
+        if (!requestSnap.exists()) {
+
+            alert("Request Not Found");
+            return;
+
+        }
+
+        const requestData =
+            requestSnap.data();
 
         if (
-            !requestSnap.exists()
+            requestData.status !== "pending"
         ) {
 
             alert(
-                "Request Not Found"
+                "Request Already Processed"
             );
 
             return;
@@ -202,8 +186,7 @@ async function (
             requestRef,
             {
 
-                status:
-                    "approved",
+                status: "approved",
 
                 approved_at:
                     new Date()
@@ -223,18 +206,14 @@ async function (
 
     } catch (error) {
 
-        alert(
-            error.message
-        );
+        alert(error.message);
 
     }
 
 };
 
 window.rejectWithdraw =
-async function (
-    requestId
-) {
+async function (requestId) {
 
     try {
 
@@ -246,18 +225,11 @@ async function (
             );
 
         const requestSnap =
-            await getDoc(
-                requestRef
-            );
+            await getDoc(requestRef);
 
-        if (
-            !requestSnap.exists()
-        ) {
+        if (!requestSnap.exists()) {
 
-            alert(
-                "Request Not Found"
-            );
-
+            alert("Request Not Found");
             return;
 
         }
@@ -265,12 +237,23 @@ async function (
         const requestData =
             requestSnap.data();
 
+        if (
+            requestData.status !== "pending"
+        ) {
+
+            alert(
+                "Request Already Processed"
+            );
+
+            return;
+
+        }
+
         await updateDoc(
             requestRef,
             {
 
-                status:
-                    "rejected",
+                status: "rejected",
 
                 approved_at:
                     new Date()
@@ -306,9 +289,7 @@ async function (
 
     } catch (error) {
 
-        alert(
-            error.message
-        );
+        alert(error.message);
 
     }
 
