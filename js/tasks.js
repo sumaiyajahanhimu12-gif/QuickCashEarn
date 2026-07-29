@@ -131,6 +131,16 @@ async function loadTasks() {
 
         }
 
+        // TASK LIMIT CHECK (Limit পূর্ণ হলে Task দেখানো হবে না)
+        if (
+            task.limit &&
+            (task.completed_count || 0) >= task.limit
+        ) {
+
+            continue;
+
+        }
+
         const taskId =
             taskDoc.id;
 
@@ -377,6 +387,20 @@ async function (
 
         }
 
+        // TASK LIMIT SAFETY CHECK
+        if (
+            task.limit &&
+            (task.completed_count || 0) >= task.limit
+        ) {
+
+            alert(
+                "Task Limit Reached"
+            );
+
+            return;
+
+        }
+
         if (
             task.code &&
             task.code.trim() !==
@@ -463,6 +487,7 @@ async function (
 
         }
 
+        // USER COIN INCREASE
         await updateDoc(
             userRef,
             {
@@ -471,6 +496,21 @@ async function (
                     increment(
                         task.coin
                     )
+
+            }
+        );
+
+        // TASK COMPLETED COUNT INCREASE
+        await updateDoc(
+            doc(
+                db,
+                "tasks",
+                taskId
+            ),
+            {
+
+                completed_count:
+                    increment(1)
 
             }
         );
@@ -682,3 +722,4 @@ async function (
     }
 
 };
+                
