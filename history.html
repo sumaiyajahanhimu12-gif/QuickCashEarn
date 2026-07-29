@@ -1,46 +1,74 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Withdraw History - QuickCashEarn</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body><div class="container"><div class="top-bar">
 
-    <button class="back-btn"
+<title>Withdraw History - QuickCashEarn</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<div class="container">
+
+    <div class="top-bar">
+
+        <button
+        class="back-btn"
+        onclick="window.location.href='dashboard.html'">
+
+            ← Dashboard
+
+        </button>
+
+    </div>
+
+    <h1>
+        📜 Withdraw History
+    </h1>
+
+    <p>
+        Track your withdraw requests and view recent payment proofs.
+    </p>
+
+    <hr>
+
+    <h2>
+        🧾 My Withdraw Requests
+    </h2>
+
+    <div id="historyContainer">
+
+        <div class="task-card">
+
+            Loading...
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <button
+    onclick="window.location.href='withdraw.html'">
+
+        💰 New Withdraw
+
+    </button>
+
+    <button
     onclick="window.location.href='dashboard.html'">
-        ← Dashboard
+
+        🏠 Dashboard
+
     </button>
 
 </div>
 
-<h1>📜 Withdraw History</h1>
+<script type="module" src="js/history.js"></script>
 
-<p>
-    View all your withdraw requests and their status.
-</p>
-
-<hr>
-
-<div id="historyContainer">
-
-    <div class="task-card">
-        Loading Withdraw History...
-    </div>
-
-</div>
-
-<hr>
-
-<button
-onclick="window.location.href='withdraw.html'">
-    💰 New Withdraw
-</button>
-
-<button
-onclick="window.location.href='dashboard.html'">
-    🏠 Dashboard
-</button>
-
-</div><script type="module" src="js/history.js"></script></body>
+</body>
 </html>
