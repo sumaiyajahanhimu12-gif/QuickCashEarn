@@ -19,41 +19,67 @@ onAuthStateChanged(auth, async (user) => {
     if (!user) {
 
         window.location.href = "../login.html";
-
         return;
 
     }
 
-    const userDoc =
-        await getDoc(
-            doc(db, "users", user.uid)
-        );
+    try {
 
-    if (!userDoc.exists()) {
+        const userRef =
+            doc(db, "users", user.uid);
 
-        alert("User not found");
+        const userDoc =
+            await getDoc(userRef);
 
-        return;
+        if (!userDoc.exists()) {
+
+            alert("User not found");
+            window.location.href =
+                "../login.html";
+            return;
+
+        }
+
+        const data =
+            userDoc.data();
+
+        // BAN PROTECTION
+
+        if (data.status === "banned") {
+
+            alert(
+                "Your Account Has Been Suspended"
+            );
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+        // ADMIN CHECK
+
+        if (data.role !== "admin") {
+
+            alert("Access Denied");
+
+            window.location.href =
+                "../dashboard.html";
+
+            return;
+
+        }
+
+        await loadStats();
+
+        await loadTasks();
+
+    } catch (error) {
+
+        alert(error.message);
 
     }
-
-    const data =
-        userDoc.data();
-
-    if (data.role !== "admin") {
-
-        alert("Access Denied");
-
-        window.location.href =
-            "../dashboard.html";
-
-        return;
-
-    }
-
-    await loadStats();
-
-    await loadTasks();
 
 });
 
@@ -141,11 +167,11 @@ window.createTask = async function () {
             collection(db, "tasks"),
             {
 
-                name: name,
+                name,
 
-                link: link,
+                link,
 
-                coin: coin,
+                coin,
 
                 limit: limitValue
                     ? parseInt(limitValue)
@@ -153,9 +179,9 @@ window.createTask = async function () {
 
                 code: code || "",
 
-                type: type,
+                type,
 
-                status: status,
+                status,
 
                 completed_count: 0,
 
@@ -240,18 +266,17 @@ async function loadTasks() {
 
             <p>Status: ${task.status}</p>
 
-            <button
-            onclick="deleteTask('${taskDoc.id}')">
+            <p>Completed: ${task.completed_count || 0}</p>
+
+            <button onclick="deleteTask('${taskDoc.id}')">
             Delete
             </button>
 
-            <button
-            onclick="pauseTask('${taskDoc.id}')">
+            <button onclick="pauseTask('${taskDoc.id}')">
             Pause
             </button>
 
-            <button
-            onclick="publishTask('${taskDoc.id}')">
+            <button onclick="publishTask('${taskDoc.id}')">
             Publish
             </button>
 
@@ -274,9 +299,7 @@ async function(taskId) {
             !confirm(
                 "Delete this task?"
             )
-        ) {
-            return;
-        }
+        ) return;
 
         await deleteDoc(
             doc(
