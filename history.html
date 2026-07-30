@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Withdraw History - QuickCashEarn</title>
+    <title>QuickCashEarn</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- Monetag Verification Meta Tag -->
+    <meta name="monetag" content="9df2629a1bd6e341b11e35caf851dfb1">
 </head>
 <body>
 
     <div class="container">
-        <div class="top-bar">
-            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+        <h1>💰 QuickCashEarn</h1>
+        <p>Earn Coins by Completing Tasks & Referring Friends</p>
+
+        <div class="buttons">
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
         </div>
-
-        <h1>📜 Withdraw History</h1>
-        <p>Track your withdraw requests and view recent payment proofs.</p>
-
-        <hr>
-
-        <h2>🧾 My Withdraw Requests</h2>
-
-        <div id="historyContainer">
-            <div class="task-card">Loading...</div>
-        </div>
-
-        <br>
-
-        <button onclick="window.location.href='withdraw.html'">💰 New Withdraw</button>
-        <button onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
     </div>
 
-    <script type="module" src="js/history.js"></script>
+    <!-- অটো-লগইন চেক করার জন্য নিচের কোডটি যুক্ত করা হয়েছে -->
+    <script type="module">
+        import { auth, onAuthStateChanged } from "./js/firebase.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // ইউজার আগে থেকে লগইন থাকলে সরাসরি ড্যাশবোর্ডে পাঠাবে
+                window.location.href = "dashboard.html";
+            }
+        });
+    </script>
 
 </body>
 </html>
