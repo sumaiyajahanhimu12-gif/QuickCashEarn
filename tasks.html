@@ -1,46 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasks - QuickCashEarn</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks - QuickCashEarn</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <button onclick="window.location.href='dashboard.html'">⬅ Back To Dashboard</button>
 
-    <button
-    onclick="window.location.href='dashboard.html'">
-        ⬅ Back To Dashboard
-    </button>
+        <h1>📋 Available Tasks</h1>
+        <p>Complete tasks and earn coins.</p>
 
-    <h1>📋 Available Tasks</h1>
+        <hr>
 
-    <p>
-        Complete tasks and earn coins.
-    </p>
-
-    <hr>
-
-    <div id="tasksContainer">
-
-        <div class="task-card">
-            <p>Loading Tasks...</p>
+        <div id="tasksContainer">
+            <div class="task-card">
+                <p>Loading Tasks...</p>
+            </div>
         </div>
 
+        <hr>
+
+        <button onclick="window.location.href='dashboard.html'">⬅ Back To Dashboard</button>
     </div>
 
-    <hr>
-
-    <button
-    onclick="window.location.href='dashboard.html'">
-        ⬅ Back To Dashboard
-    </button>
-
-</div>
-
-<script type="module" src="js/tasks.js"></script>
+    <script type="module" src="js/tasks.js"></script>
 
 </body>
 </html>
