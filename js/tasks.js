@@ -58,7 +58,7 @@ async function loadTasks() {
         if (task.limit && (task.completed_count || 0) >= task.limit) continue;
 
         const taskId = taskDoc.id;
-        const claimId = `\( {user.uid}_ \){taskId}`;
+        const claimId = user.uid + "_" + taskId;
         const claimSnap = await getDoc(doc(db, "task_claims", claimId));
 
         if (claimSnap.exists()) {
@@ -68,12 +68,14 @@ async function loadTasks() {
         }
 
         tasksData.push({ id: taskId, ...task });
+
+        const link = task.link || "";
         container.innerHTML += `
             <div class="task-card">
                 <h3>${task.name}</h3>
                 <p>Reward: ${task.coin} Coins</p>
                 <p>Type: ${task.type}</p>
-                <button onclick="openTask('\( {taskId}',' \){task.link || ''}')">Open Task</button>
+                <button onclick="openTask('\( {taskId}', ' \){link}')">Open Task</button>
                 <div id="claim-${taskId}"></div>
             </div>
             <hr>
@@ -83,14 +85,20 @@ async function loadTasks() {
 }
 
 window.openTask = function (taskId, link) {
-    if (link) window.open(link, "_blank");
+    if (link && link.trim() !== "") {
+        window.open(link, "_blank");
+    } else {
+        alert("Task link not found");
+    }
+
     const task = tasksData.find(t => t.id === taskId);
     let html = "";
-    if (task?.code?.trim()) {
+    if (task && task.code && task.code.trim() !== "") {
         html += `<br><input type="text" id="code-${taskId}" placeholder="Verification Code"><br><br>`;
     }
     html += `<button onclick="claimTask('${taskId}')">Claim Reward</button>`;
-    const div = document.getElementById(`claim-${taskId}`);
+
+    const div = document.getElementById("claim-" + taskId);
     if (div) div.innerHTML = html;
 };
 
@@ -113,13 +121,13 @@ window.claimTask = async function (taskId) {
         if (!task) return alert("Task Not Found");
         if (task.limit && (task.completed_count || 0) >= task.limit) return alert("Task Limit Reached");
 
-        if (task.code?.trim()) {
-            const entered = document.getElementById(`code-${taskId}`)?.value.trim() || "";
+        if (task.code && task.code.trim() !== "") {
+            const entered = document.getElementById("code-" + taskId)?.value.trim() || "";
             if (entered !== task.code) return alert("Wrong Verification Code");
         }
 
         const today = new Date().toISOString().split("T")[0];
-        const claimId = `\( {user.uid}_ \){taskId}`;
+        const claimId = user.uid + "_" + taskId;
         const claimRef = doc(db, "task_claims", claimId);
         const claimSnap = await getDoc(claimRef);
 
@@ -129,12 +137,11 @@ window.claimTask = async function (taskId) {
             if (task.type === "daily" && claim.last_claim_date === today) return alert("Already Claimed Today");
         }
 
-        // Coin + Task count
         await updateDoc(userRef, { coin: increment(task.coin) });
         await updateDoc(doc(db, "tasks", taskId), { completed_count: increment(1) });
 
         // Referral Bonus 5%
-        if (userData.referred_by?.trim()) {
+        if (userData.referred_by && userData.referred_by.trim() !== "") {
             const refQ = query(collection(db, "users"), where("referral_code", "==", userData.referred_by));
             const refSnap = await getDocs(refQ);
             if (!refSnap.empty) {
@@ -157,7 +164,7 @@ window.claimTask = async function (taskId) {
             }
         }
 
-        // Active Days (consecutive)
+        // Active Days
         const lastDate = userData.last_active_date || "";
         if (lastDate !== today) {
             let newDays = 1;
