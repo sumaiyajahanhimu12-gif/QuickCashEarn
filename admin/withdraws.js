@@ -1,172 +1,108 @@
-import { 
-    auth, 
-    db, 
-    onAuthStateChanged, 
-    doc, 
-    getDoc, 
-    collection, 
-    getDocs, 
-    updateDoc, 
-    increment 
+import {
+    auth,
+    db,
+    onAuthStateChanged,
+    doc,
+    getDoc,
+    collection,
+    getDocs,
+    updateDoc,
+    increment
 } from "../js/firebase.js";
 
 onAuthStateChanged(auth, async (user) => {
-
     if (!user) {
         window.location.href = "../login.html";
         return;
     }
-
     try {
-
-        const adminRef = doc(db, "users", user.uid);
-        const adminSnap = await getDoc(adminRef);
-
-        if (!adminSnap.exists()) {
-            alert("User Not Found");
-            return;
-        }
-
-        const adminData = adminSnap.data();
-
-        if (adminData.status === "banned") {
-            alert("Your Account Has Been Suspended");
+        const adminSnap = await getDoc(doc(db, "users", user.uid));
+        if (!adminSnap.exists() || adminSnap.data().status === "banned") {
             window.location.href = "../login.html";
             return;
         }
-
-        if (adminData.role !== "admin") {
+        if (adminSnap.data().role !== "admin") {
             alert("Access Denied");
             window.location.href = "../dashboard.html";
             return;
         }
-
         await loadWithdraws();
-
-    } catch (error) {
-        alert(error.message);
+    } catch (e) {
+        alert(e.message);
     }
-
 });
 
 async function loadWithdraws() {
-
     const container = document.getElementById("withdrawContainer");
     if (!container) return;
-
     container.innerHTML = "";
 
     try {
-        const snapshot = await getDocs(collection(db, "withdraw_requests"));
-
-        if (snapshot.empty) {
-            container.innerHTML = "<p>No Withdraw Requests</p>";
-            return;
-        }
-
+        const snap = await getDocs(collection(db, "withdraw_requests"));
         let hasPending = false;
 
-        snapshot.forEach((requestDoc) => {
-            const data = requestDoc.data();
-
-            if (data.status !== "pending") {
-                return;
-            }
-
+        snap.forEach(reqDoc => {
+            const data = reqDoc.data();
+            if (data.status !== "pending") return;
             hasPending = true;
-
             container.innerHTML += `
-            <div class="task-card">
-                <h3>${data.username || "User"}</h3>
-                <p>Method: ${data.method}</p>
-                <p>Number: ${data.number}</p>
-                <p>Coins: ${data.coin}</p>
-                <p>Status: ${data.status}</p>
-
-                <button onclick="approveWithdraw('${requestDoc.id}')">Approve</button>
-                <button onclick="rejectWithdraw('${requestDoc.id}')">Reject</button>
-            </div>
-            <hr>
+                <div class="task-card">
+                    <h3>${data.username || "User"}</h3>
+                    <p>Method: ${data.method}</p>
+                    <p>Number: ${data.number}</p>
+                    <p>Coins: ${data.coin}</p>
+                    <p>Status: ${data.status}</p>
+                    <button onclick="approveWithdraw('${reqDoc.id}')">Approve</button>
+                    <button onclick="rejectWithdraw('${reqDoc.id}')">Reject</button>
+                </div>
+                <hr>
             `;
         });
 
-        if (!hasPending) {
-            container.innerHTML = "<p>No Withdraw Requests</p>";
-        }
-    } catch (error) {
-        console.error("Error loading withdraws:", error);
+        if (!hasPending) container.innerHTML = "<p>No Pending Withdraw Requests</p>";
+    } catch (e) {
+        console.error(e);
     }
-
 }
 
 window.approveWithdraw = async function (requestId) {
-
     try {
-
         const requestRef = doc(db, "withdraw_requests", requestId);
-        const requestSnap = await getDoc(requestRef);
-
-        if (!requestSnap.exists()) {
-            alert("Request Not Found");
-            return;
-        }
-
-        const requestData = requestSnap.data();
-
-        if (requestData.status !== "pending") {
-            alert("Request Already Processed");
-            return;
-        }
+        const snap = await getDoc(requestRef);
+        if (!snap.exists()) return alert("Request Not Found");
+        if (snap.data().status !== "pending") return alert("Already Processed");
 
         await updateDoc(requestRef, {
             status: "approved",
             approved_at: new Date().toISOString(),
-            approved_by: auth.currentUser ? auth.currentUser.uid : ""
+            approved_by: auth.currentUser?.uid || ""
         });
-
-        alert("Withdraw Approved");
-        location.reload();
-
-    } catch (error) {
-        alert(error.message);
+        alert("Approved");
+        await loadWithdraws();
+    } catch (e) {
+        alert(e.message);
     }
-
 };
 
 window.rejectWithdraw = async function (requestId) {
-
     try {
-
         const requestRef = doc(db, "withdraw_requests", requestId);
-        const requestSnap = await getDoc(requestRef);
-
-        if (!requestSnap.exists()) {
-            alert("Request Not Found");
-            return;
-        }
-
-        const requestData = requestSnap.data();
-
-        if (requestData.status !== "pending") {
-            alert("Request Already Processed");
-            return;
-        }
+        const snap = await getDoc(requestRef);
+        if (!snap.exists()) return alert("Request Not Found");
+        const data = snap.data();
+        if (data.status !== "pending") return alert("Already Processed");
 
         await updateDoc(requestRef, {
             status: "rejected",
             approved_at: new Date().toISOString(),
-            approved_by: auth.currentUser ? auth.currentUser.uid : ""
+            approved_by: auth.currentUser?.uid || ""
         });
-
-        await updateDoc(doc(db, "users", requestData.uid), {
-            coin: increment(requestData.coin)
+        await updateDoc(doc(db, "users", data.uid), {
+            coin: increment(data.coin)
         });
-
-        alert("Withdraw Rejected & Coins Refunded");
-        location.reload();
-
-    } catch (error) {
-        alert(error.message);
+        alert("Rejected & Coins Refunded");
+        await loadWithdraws();
+    } catch (e) {
+        alert(e.message);
     }
-
 };
