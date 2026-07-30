@@ -7,54 +7,40 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
     <div class="container">
-        <div class="top-bar">
-            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Dashboard</button>
-        </div>
-
+        <button onclick="window.location.href='dashboard.html'">← Dashboard</button>
         <h1>💰 Withdraw Coins</h1>
 
         <div class="task-card">
             <h3>Current Balance</h3>
-            <p style="font-size:24px; font-weight:bold;">
-                <span id="coinBalance">0</span> Coins
-            </p>
+            <p style="font-size:24px;font-weight:bold;"><span id="coinBalance">0</span> Coins</p>
         </div>
 
         <div class="task-card">
-            <p>✅ Minimum Withdraw: <strong>50,000 Coins</strong></p>
-            <p>✅ Withdraw Period: <strong>1 - 10 Date</strong></p>
-            <p>✅ Minimum Active Days: <strong>14 Days</strong></p>
-            <p>✅ Minimum Referrals: <strong>10 Users</strong></p>
+            <p>✅ Minimum: <strong>50,000 Coins</strong></p>
+            <p>✅ Period: <strong>1 - 10 Date</strong></p>
+            <p>✅ Active Days: <strong>14+</strong></p>
+            <p>✅ Referrals: <strong>10+</strong></p>
             <p>✅ Top 10 Referral Coins: <strong>100,000+</strong></p>
+            <p>✅ Email Verified Required</p>
         </div>
 
         <h2>Payment Method</h2>
-
         <select id="method">
             <option value="bkash">Bkash</option>
             <option value="nagad">Nagad</option>
+            <option value="rocket">Rocket</option>
         </select>
-
         <br><br>
-
-        <input type="text" id="number" placeholder="017XXXXXXXX">
-
+        <input type="text" id="number" placeholder="01XXXXXXXXX">
         <br><br>
-
-        <input type="number" id="amount" placeholder="Enter Coin Amount">
-
+        <input type="number" id="amount" placeholder="Coin Amount">
         <br><br>
-
-        <button onclick="submitWithdraw()">🚀 Submit Withdraw Request</button>
-
-        <br><br>
-
-        <button onclick="window.location.href='history.html'">📜 Withdraw History</button>
+        <button id="withdrawBtn">🚀 Submit Withdraw</button>
+        <p id="withdrawMsg" style="color:red;"></p>
+        <br>
+        <button onclick="window.location.href='history.html'">📜 History</button>
     </div>
-
     <script type="module" src="js/withdraw.js"></script>
-
 </body>
 </html>
