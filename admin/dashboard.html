@@ -7,55 +7,35 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
     <div class="container">
-        <button class="back-btn" onclick="window.location.href='../dashboard.html'">
-            ← Back To User Dashboard
-        </button>
-
+        <button onclick="window.location.href='../dashboard.html'">← User Dashboard</button>
         <h1>⚙️ Admin Dashboard</h1>
-
         <p>Total Users: <span id="totalUsers">0</span></p>
         <p>Total Coins: <span id="totalCoins">0</span></p>
-
         <hr>
-
         <button onclick="window.location.href='withdraws.html'">💰 Withdraw Requests</button>
         <br><br>
         <button onclick="window.location.href='users.html'">👥 User Management</button>
-
         <hr>
-
         <h2>Create Task</h2>
-
         <input type="text" id="taskName" placeholder="Task Name"><br><br>
         <input type="text" id="taskLink" placeholder="Task Link"><br><br>
         <input type="number" id="taskCoin" placeholder="Coins"><br><br>
-        <input type="number" id="taskLimit" placeholder="Limit (Leave Empty = Unlimited)"><br><br>
+        <input type="number" id="taskLimit" placeholder="Limit (Empty = Unlimited)"><br><br>
         <input type="text" id="taskCode" placeholder="Verification Code (Optional)"><br><br>
-
         <select id="taskType">
-            <option value="permanent">Permanent Task</option>
-            <option value="daily">Daily Task</option>
+            <option value="permanent">Permanent</option>
+            <option value="daily">Daily</option>
         </select><br><br>
-
         <select id="taskStatus">
             <option value="published">Published</option>
             <option value="pending">Pending</option>
         </select><br><br>
-
-        <button onclick="createTask()">➕ Create Task</button>
-
+        <button id="createTaskBtn">➕ Create Task</button>
         <hr>
-
         <h2>All Tasks</h2>
-
-        <div id="tasksContainer">
-            Loading Tasks...
-        </div>
+        <div id="tasksContainer">Loading...</div>
     </div>
-
     <script type="module" src="../js/admin.js"></script>
-
 </body>
 </html>
