@@ -1,84 +1,60 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Withdraw - QuickCashEarn</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - QuickCashEarn</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body><div class="container"><div class="top-bar">
+<body>
 
-    <button class="back-btn"
-    onclick="window.location.href='dashboard.html'">
-        ← Dashboard
-    </button>
+    <div class="container">
+        <div class="top-bar">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+        </div>
 
-</div>
+        <h1>💰 Withdraw Coins</h1>
 
-<h1>💰 Withdraw Coins</h1>
+        <div class="task-card">
+            <h3>Current Balance</h3>
+            <p style="font-size:24px; font-weight:bold;">
+                <span id="coinBalance">0</span> Coins
+            </p>
+        </div>
 
-<div class="task-card">
+        <div class="task-card">
+            <p>✅ Minimum Withdraw: <strong>50,000 Coins</strong></p>
+            <p>✅ Withdraw Period: <strong>1 - 10 Date</strong></p>
+            <p>✅ Minimum Active Days: <strong>14 Days</strong></p>
+            <p>✅ Minimum Referrals: <strong>10 Users</strong></p>
+            <p>✅ Top 10 Referral Coins: <strong>100,000+</strong></p>
+        </div>
 
-    <h3>Current Balance</h3>
+        <h2>Payment Method</h2>
 
-    <p style="font-size:24px;font-weight:bold;">
-        <span id="coinBalance">0</span> Coins
-    </p>
+        <select id="method">
+            <option value="bkash">Bkash</option>
+            <option value="nagad">Nagad</option>
+        </select>
 
-</div>
+        <br><br>
 
-<div class="task-card">
+        <input type="text" id="number" placeholder="017XXXXXXXX">
 
-    <p>✅ Minimum Withdraw: <strong>50,000 Coins</strong></p>
+        <br><br>
 
-    <p>✅ Withdraw Period: <strong>1 - 10 Date</strong></p>
+        <input type="number" id="amount" placeholder="Enter Coin Amount">
 
-    <p>✅ Minimum Active Days: <strong>14 Days</strong></p>
+        <br><br>
 
-    <p>✅ Minimum Referrals: <strong>10 Users</strong></p>
+        <button onclick="submitWithdraw()">🚀 Submit Withdraw Request</button>
 
-    <p>✅ Top 10 Referral Coins: <strong>100,000+</strong></p>
+        <br><br>
 
-</div>
+        <button onclick="window.location.href='history.html'">📜 Withdraw History</button>
+    </div>
 
-<h2>Payment Method</h2>
+    <script type="module" src="js/withdraw.js"></script>
 
-<select id="method">
-
-    <option value="bkash">
-        Bkash
-    </option>
-
-    <option value="nagad">
-        Nagad
-    </option>
-
-</select>
-
-<br><br>
-
-<input
-type="text"
-id="number"
-placeholder="017XXXXXXXX">
-
-<br><br>
-
-<input
-type="number"
-id="amount"
-placeholder="Enter Coin Amount">
-
-<br><br>
-
-<button onclick="submitWithdraw()">
-    🚀 Submit Withdraw Request
-</button>
-
-<br><br>
-
-<button onclick="window.location.href='history.html'">
-    📜 Withdraw History
-</button>
-
-</div><script type="module" src="js/withdraw.js"></script></body>
+</body>
 </html>
