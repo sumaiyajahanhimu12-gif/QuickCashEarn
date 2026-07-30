@@ -1,164 +1,104 @@
-import { auth, db } from "../js/firebase.js";
-
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-    doc,
-    getDoc,
-    collection,
-    getDocs,
-    addDoc,
-    updateDoc,
-    deleteDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+    auth, 
+    db, 
+    onAuthStateChanged, 
+    doc, 
+    getDoc, 
+    collection, 
+    getDocs, 
+    addDoc, 
+    updateDoc, 
+    deleteDoc 
+} from "./firebase.js";
 
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
-
         window.location.href = "../login.html";
         return;
-
     }
 
     try {
 
-        const userRef =
-            doc(db, "users", user.uid);
-
-        const userDoc =
-            await getDoc(userRef);
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
 
         if (!userDoc.exists()) {
-
             alert("User not found");
-            window.location.href =
-                "../login.html";
+            window.location.href = "../login.html";
             return;
-
         }
 
-        const data =
-            userDoc.data();
+        const data = userDoc.data();
 
         // BAN PROTECTION
-
         if (data.status === "banned") {
-
-            alert(
-                "Your Account Has Been Suspended"
-            );
-
-            window.location.href =
-                "../login.html";
-
+            alert("Your Account Has Been Suspended");
+            window.location.href = "../login.html";
             return;
-
         }
 
         // ADMIN CHECK
-
         if (data.role !== "admin") {
-
             alert("Access Denied");
-
-            window.location.href =
-                "../dashboard.html";
-
+            window.location.href = "../dashboard.html";
             return;
-
         }
 
         await loadStats();
-
         await loadTasks();
 
     } catch (error) {
-
         alert(error.message);
-
     }
 
 });
 
 async function loadStats() {
 
-    const usersSnapshot =
-        await getDocs(
-            collection(db, "users")
-        );
+    try {
+        const usersSnapshot = await getDocs(collection(db, "users"));
 
-    let totalUsers = 0;
-    let totalCoins = 0;
+        let totalUsers = 0;
+        let totalCoins = 0;
 
-    usersSnapshot.forEach((userDoc) => {
+        usersSnapshot.forEach((userDoc) => {
+            totalUsers++;
+            totalCoins += userDoc.data().coin || 0;
+        });
 
-        totalUsers++;
+        const totalUsersElem = document.getElementById("totalUsers");
+        if (totalUsersElem) totalUsersElem.innerText = totalUsers;
 
-        totalCoins +=
-            userDoc.data().coin || 0;
-
-    });
-
-    document.getElementById(
-        "totalUsers"
-    ).innerText = totalUsers;
-
-    document.getElementById(
-        "totalCoins"
-    ).innerText = totalCoins;
+        const totalCoinsElem = document.getElementById("totalCoins");
+        if (totalCoinsElem) totalCoinsElem.innerText = totalCoins;
+    } catch (error) {
+        console.error("Error loading stats:", error);
+    }
 
 }
 
 window.createTask = async function () {
 
-    const name =
-        document.getElementById(
-            "taskName"
-        ).value.trim();
+    const nameInput = document.getElementById("taskName");
+    const linkInput = document.getElementById("taskLink");
+    const coinInput = document.getElementById("taskCoin");
+    const limitInput = document.getElementById("taskLimit");
+    const codeInput = document.getElementById("taskCode");
+    const typeInput = document.getElementById("taskType");
+    const statusInput = document.getElementById("taskStatus");
 
-    const link =
-        document.getElementById(
-            "taskLink"
-        ).value.trim();
-
-    const coin =
-        parseInt(
-            document.getElementById(
-                "taskCoin"
-            ).value
-        );
-
-    const limitValue =
-        document.getElementById(
-            "taskLimit"
-        ).value;
-
-    const code =
-        document.getElementById(
-            "taskCode"
-        ).value.trim();
-
-    const type =
-        document.getElementById(
-            "taskType"
-        ).value;
-
-    const status =
-        document.getElementById(
-            "taskStatus"
-        ).value;
+    const name = nameInput ? nameInput.value.trim() : "";
+    const link = linkInput ? linkInput.value.trim() : "";
+    const coin = coinInput ? parseInt(coinInput.value) : 0;
+    const limitValue = limitInput ? limitInput.value : "";
+    const code = codeInput ? codeInput.value.trim() : "";
+    const type = typeInput ? typeInput.value : "daily";
+    const status = statusInput ? statusInput.value : "published";
 
     if (!name || !link || !coin) {
-
-        alert(
-            "Please fill required fields"
-        );
-
+        alert("Please fill required fields");
         return;
-
     }
 
     try {
@@ -166,219 +106,127 @@ window.createTask = async function () {
         await addDoc(
             collection(db, "tasks"),
             {
-
                 name,
-
                 link,
-
                 coin,
-
-                limit: limitValue
-                    ? parseInt(limitValue)
-                    : null,
-
+                limit: limitValue ? parseInt(limitValue) : null,
                 code: code || "",
-
                 type,
-
                 status,
-
                 completed_count: 0,
-
-                created_at:
-                    new Date()
-                    .toISOString()
-
+                created_at: new Date().toISOString()
             }
         );
 
-        alert(
-            "Task Created Successfully"
-        );
+        alert("Task Created Successfully");
 
-        document.getElementById(
-            "taskName"
-        ).value = "";
-
-        document.getElementById(
-            "taskLink"
-        ).value = "";
-
-        document.getElementById(
-            "taskCoin"
-        ).value = "";
-
-        document.getElementById(
-            "taskLimit"
-        ).value = "";
-
-        document.getElementById(
-            "taskCode"
-        ).value = "";
+        if (nameInput) nameInput.value = "";
+        if (linkInput) linkInput.value = "";
+        if (coinInput) coinInput.value = "";
+        if (limitInput) limitInput.value = "";
+        if (codeInput) codeInput.value = "";
 
         await loadTasks();
 
     } catch (error) {
-
         alert(error.message);
-
     }
 
 };
 
 async function loadTasks() {
 
-    const container =
-        document.getElementById(
-            "tasksContainer"
-        );
+    const container = document.getElementById("tasksContainer");
+    if (!container) return;
 
     container.innerHTML = "";
 
-    const snapshot =
-        await getDocs(
-            collection(db, "tasks")
-        );
+    try {
+        const snapshot = await getDocs(collection(db, "tasks"));
 
-    if (snapshot.empty) {
+        if (snapshot.empty) {
+            container.innerHTML = "<p>No Tasks Found</p>";
+            return;
+        }
 
-        container.innerHTML =
-            "<p>No Tasks Found</p>";
+        snapshot.forEach((taskDoc) => {
+            const task = taskDoc.data();
 
-        return;
+            container.innerHTML += `
+            <div class="task-card">
+                <h3>${task.name}</h3>
+                <p>Coins: ${task.coin}</p>
+                <p>Type: ${task.type}</p>
+                <p>Status: ${task.status}</p>
+                <p>Completed: ${task.completed_count || 0}</p>
 
+                <button onclick="deleteTask('${taskDoc.id}')">Delete</button>
+                <button onclick="pauseTask('${taskDoc.id}')">Pause</button>
+                <button onclick="publishTask('${taskDoc.id}')">Publish</button>
+            </div>
+            <hr>
+            `;
+        });
+    } catch (error) {
+        console.error("Error loading tasks:", error);
     }
-
-    snapshot.forEach((taskDoc) => {
-
-        const task =
-            taskDoc.data();
-
-        container.innerHTML += `
-
-        <div class="task-card">
-
-            <h3>${task.name}</h3>
-
-            <p>Coins: ${task.coin}</p>
-
-            <p>Type: ${task.type}</p>
-
-            <p>Status: ${task.status}</p>
-
-            <p>Completed: ${task.completed_count || 0}</p>
-
-            <button onclick="deleteTask('${taskDoc.id}')">
-            Delete
-            </button>
-
-            <button onclick="pauseTask('${taskDoc.id}')">
-            Pause
-            </button>
-
-            <button onclick="publishTask('${taskDoc.id}')">
-            Publish
-            </button>
-
-        </div>
-
-        <hr>
-
-        `;
-
-    });
 
 }
 
-window.deleteTask =
-async function(taskId) {
+window.deleteTask = async function(taskId) {
 
     try {
 
-        if (
-            !confirm(
-                "Delete this task?"
-            )
-        ) return;
+        if (!confirm("Delete this task?")) return;
 
-        await deleteDoc(
-            doc(
-                db,
-                "tasks",
-                taskId
-            )
-        );
+        await deleteDoc(doc(db, "tasks", taskId));
 
-        alert(
-            "Task Deleted"
-        );
-
+        alert("Task Deleted");
         await loadTasks();
 
     } catch (error) {
-
         alert(error.message);
-
     }
 
 };
 
-window.pauseTask =
-async function(taskId) {
+window.pauseTask = async function(taskId) {
 
     try {
 
         await updateDoc(
-            doc(
-                db,
-                "tasks",
-                taskId
-            ),
+            doc(db, "tasks", taskId),
             {
                 status: "pending"
             }
         );
 
-        alert(
-            "Task Paused"
-        );
-
+        alert("Task Paused");
         await loadTasks();
 
     } catch (error) {
-
         alert(error.message);
-
     }
 
 };
 
-window.publishTask =
-async function(taskId) {
+window.publishTask = async function(taskId) {
 
     try {
 
         await updateDoc(
-            doc(
-                db,
-                "tasks",
-                taskId
-            ),
+            doc(db, "tasks", taskId),
             {
                 status: "published"
             }
         );
 
-        alert(
-            "Task Published"
-        );
-
+        alert("Task Published");
         await loadTasks();
 
     } catch (error) {
-
         alert(error.message);
-
     }
 
 };
+    
