@@ -1,132 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard - QuickCashEarn</title>
-<link rel="stylesheet" href="../css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - QuickCashEarn</title>
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='../dashboard.html'">
+            ← Back To User Dashboard
+        </button>
 
-    <button class="back-btn"
-    onclick="window.location.href='../dashboard.html'">
-        ← Back To User Dashboard
-    </button>
+        <h1>⚙️ Admin Dashboard</h1>
 
-    <h1>⚙️ Admin Dashboard</h1>
+        <p>Total Users: <span id="totalUsers">0</span></p>
+        <p>Total Coins: <span id="totalCoins">0</span></p>
 
-    <p>
-        Total Users:
-        <span id="totalUsers">0</span>
-    </p>
+        <hr>
 
-    <p>
-        Total Coins:
-        <span id="totalCoins">0</span>
-    </p>
+        <button onclick="window.location.href='withdraws.html'">💰 Withdraw Requests</button>
+        <br><br>
+        <button onclick="window.location.href='users.html'">👥 User Management</button>
 
-    <hr>
+        <hr>
 
-    <button
-    onclick="window.location.href='withdraws.html'">
-        💰 Withdraw Requests
-    </button>
+        <h2>Create Task</h2>
 
-    <br><br>
+        <input type="text" id="taskName" placeholder="Task Name"><br><br>
+        <input type="text" id="taskLink" placeholder="Task Link"><br><br>
+        <input type="number" id="taskCoin" placeholder="Coins"><br><br>
+        <input type="number" id="taskLimit" placeholder="Limit (Leave Empty = Unlimited)"><br><br>
+        <input type="text" id="taskCode" placeholder="Verification Code (Optional)"><br><br>
 
-    <button
-    onclick="window.location.href='users.html'">
-        👥 User Management
-    </button>
+        <select id="taskType">
+            <option value="permanent">Permanent Task</option>
+            <option value="daily">Daily Task</option>
+        </select><br><br>
 
-    <br><br>
+        <select id="taskStatus">
+            <option value="published">Published</option>
+            <option value="pending">Pending</option>
+        </select><br><br>
 
-    <hr>
+        <button onclick="createTask()">➕ Create Task</button>
 
-    <h2>Create Task</h2>
+        <hr>
 
-    <input
-    type="text"
-    id="taskName"
-    placeholder="Task Name">
+        <h2>All Tasks</h2>
 
-    <br><br>
-
-    <input
-    type="text"
-    id="taskLink"
-    placeholder="Task Link">
-
-    <br><br>
-
-    <input
-    type="number"
-    id="taskCoin"
-    placeholder="Coins">
-
-    <br><br>
-
-    <input
-    type="number"
-    id="taskLimit"
-    placeholder="Limit (Leave Empty = Unlimited)">
-
-    <br><br>
-
-    <input
-    type="text"
-    id="taskCode"
-    placeholder="Verification Code (Optional)">
-
-    <br><br>
-
-    <select id="taskType">
-
-        <option value="permanent">
-            Permanent Task
-        </option>
-
-        <option value="daily">
-            Daily Task
-        </option>
-
-    </select>
-
-    <br><br>
-
-    <select id="taskStatus">
-
-        <option value="published">
-            Published
-        </option>
-
-        <option value="pending">
-            Pending
-        </option>
-
-    </select>
-
-    <br><br>
-
-    <button onclick="createTask()">
-        ➕ Create Task
-    </button>
-
-    <hr>
-
-    <h2>All Tasks</h2>
-
-    <div id="tasksContainer">
-
-        Loading Tasks...
-
+        <div id="tasksContainer">
+            Loading Tasks...
+        </div>
     </div>
 
-</div>
-
-<script type="module" src="../js/admin.js"></script>
+    <script type="module" src="../js/admin.js"></script>
 
 </body>
 </html>
