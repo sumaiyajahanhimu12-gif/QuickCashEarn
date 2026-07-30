@@ -1,31 +1,31 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Management</title><link rel="stylesheet" href="../css/style.css"></head>
-<body><div class="container"><button class="back-btn"
-onclick="window.location.href='dashboard.html'">
-    ← Admin Dashboard
-</button>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - QuickCashEarn</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
 
-<h1>User Management</h1>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">
+            ← Admin Dashboard
+        </button>
 
-<input
-type="text"
-id="searchUser"
-placeholder="Search Username">
+        <h1>User Management</h1>
 
-<button onclick="loadUsers()">
-    Search
-</button>
+        <input type="text" id="searchUser" placeholder="Search Username">
+        <button onclick="loadUsers()">Search</button>
 
-<hr>
+        <hr>
 
-<div id="usersContainer">
+        <div id="usersContainer">
+            Loading Users...
+        </div>
+    </div>
 
-    Loading Users...
+    <script type="module" src="users.js"></script>
 
-</div>
-
-</div><script type="module" src="users.js"></script></body>
+</body>
 </html>
