@@ -1,28 +1,30 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    sendEmailVerification, 
-    signOut, 
-    onAuthStateChanged 
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    sendEmailVerification,
+    signOut,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    getDoc, 
-    getDocs, 
-    collection, 
-    query, 
-    where, 
-    updateDoc, 
-    increment, 
-    addDoc, 
-    serverTimestamp 
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    collection,
+    query,
+    where,
+    updateDoc,
+    increment,
+    addDoc,
+    serverTimestamp,
+    orderBy,
+    limit,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// নতুন ফায়ারবেস প্রজেক্টের কনফিগারেশন
 const firebaseConfig = {
     apiKey: "AIzaSyAumEVLzqs-wrxXbbBqPeTIxBhfxA4d_a4",
     authDomain: "quick-cash-earn.firebaseapp.com",
@@ -53,5 +55,8 @@ export {
     updateDoc,
     increment,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    orderBy,
+    limit,
+    deleteDoc
 };
