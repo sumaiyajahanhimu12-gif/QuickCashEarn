@@ -1,34 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Withdraw Requests - QuickCashEarn</title>
-<link rel="stylesheet" href="../css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Requests - QuickCashEarn</title>
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <button onclick="window.location.href='dashboard.html'" style="margin-bottom:20px;">
+            ← Back To Admin Dashboard
+        </button>
 
-    <button
-    onclick="window.location.href='dashboard.html'"
-    style="margin-bottom:20px;">
-        ← Back To Admin Dashboard
-    </button>
+        <h1>Withdraw Requests</h1>
 
-    <h1>Withdraw Requests</h1>
+        <hr>
 
-    <hr>
-
-    <div id="withdrawContainer">
-
-        Loading Withdraw Requests...
-
+        <div id="withdrawContainer">
+            Loading Withdraw Requests...
+        </div>
     </div>
 
-</div>
-
-<script type="module" src="withdraws.js"></script>
+    <script type="module" src="withdraws.js"></script>
 
 </body>
 </html>
