@@ -1,10 +1,11 @@
-import { 
-    auth, 
+import {
+    auth,
     db,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendEmailVerification,
     signOut,
+    onAuthStateChanged,
     doc,
     setDoc,
     updateDoc,
@@ -15,217 +16,190 @@ import {
     getDocs
 } from "./firebase.js";
 
-// DEVICE ID GENERATOR (মোবাইল ও ব্রাউজার ফ্রেন্ডলি)
 function getDeviceId() {
     let deviceId = localStorage.getItem("qce_device_id");
     if (!deviceId) {
-        if (typeof crypto !== "undefined" && crypto.randomUUID) {
-            deviceId = crypto.randomUUID();
-        } else {
-            deviceId = "QCE-DEV-" + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
-        }
+        deviceId = (typeof crypto !== "undefined" && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : "QCE-" + Date.now() + "-" + Math.random().toString(36).substring(2, 11);
         localStorage.setItem("qce_device_id", deviceId);
     }
     return deviceId;
 }
 
-window.registerUser = async function () {
+function showMsg(id, text, color = "red") {
+    const el = document.getElementById(id);
+    if (el) {
+        el.style.color = color;
+        el.innerText = text;
+    } else {
+        alert(text);
+    }
+}
 
-    const usernameInput = document.getElementById("username");
-    const telegramIdInput = document.getElementById("telegramId");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const referralCodeInput = document.getElementById("referralCode");
-
-    const username = usernameInput ? usernameInput.value.trim() : "";
-    const telegramId = telegramIdInput ? telegramIdInput.value.trim() : "";
-    const email = emailInput ? emailInput.value.trim() : "";
-    const password = passwordInput ? passwordInput.value : "";
-    const referralCode = referralCodeInput ? referralCodeInput.value.trim() : "";
+// ========== REGISTER ==========
+async function registerUser() {
+    const username = document.getElementById("username")?.value.trim() || "";
+    const telegramId = document.getElementById("telegramId")?.value.trim() || "";
+    const email = document.getElementById("email")?.value.trim() || "";
+    const password = document.getElementById("password")?.value || "";
+    const referralCode = document.getElementById("referralCode")?.value.trim() || "";
 
     if (!username || !telegramId || !email || !password) {
-        alert("Please fill all required fields");
+        showMsg("regMsg", "সব বাধ্যতামূলক ফিল্ড পূরণ করুন");
         return;
     }
 
-    try {
+    const btn = document.getElementById("registerBtn");
+    if (btn) btn.disabled = true;
 
-        // DEVICE ID
+    try {
         const deviceId = getDeviceId();
         const usersRef = collection(db, "users");
 
-        // ONE DEVICE = ONE ACCOUNT
-        const deviceSnap = await getDocs(
-            query(usersRef, where("device_id", "==", deviceId))
-        );
-
+        // One Device One Account
+        const deviceSnap = await getDocs(query(usersRef, where("device_id", "==", deviceId)));
         if (!deviceSnap.empty) {
-            alert("Only One Account Allowed Per Device");
+            showMsg("regMsg", "এক ডিভাইসে শুধুমাত্র একটি অ্যাকাউন্ট");
+            if (btn) btn.disabled = false;
             return;
         }
 
-        // USERNAME CHECK
-        const usernameSnap = await getDocs(
-            query(usersRef, where("username", "==", username))
-        );
-
+        // Unique Username
+        const usernameSnap = await getDocs(query(usersRef, where("username", "==", username)));
         if (!usernameSnap.empty) {
-            alert("Username Already Exists");
+            showMsg("regMsg", "Username ইতিমধ্যে আছে");
+            if (btn) btn.disabled = false;
             return;
         }
 
-        // TELEGRAM CHECK
-        const telegramSnap = await getDocs(
-            query(usersRef, where("telegram_id", "==", telegramId))
-        );
-
+        // Unique Telegram ID
+        const telegramSnap = await getDocs(query(usersRef, where("telegram_id", "==", telegramId)));
         if (!telegramSnap.empty) {
-            alert("Telegram ID Already Registered");
+            showMsg("regMsg", "Telegram ID ইতিমধ্যে রেজিস্টার করা");
+            if (btn) btn.disabled = false;
             return;
         }
 
-        // REFERRAL CHECK (Optional)
-        let validReferralCode = "";
+        // Optional Referral
+        let validReferral = "";
         if (referralCode) {
-            const referralSnap = await getDocs(
-                query(usersRef, where("referral_code", "==", referralCode))
-            );
-
-            if (!referralSnap.empty) {
-                validReferralCode = referralCode;
-            }
+            const refSnap = await getDocs(query(usersRef, where("referral_code", "==", referralCode)));
+            if (!refSnap.empty) validReferral = referralCode;
         }
 
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-
         await sendEmailVerification(user);
 
-        const generatedReferralCode =
-            "QCE-" +
-            username.toUpperCase().replace(/[^A-Z0-9]/g, "").substring(0, 4) +
-            "-" +
-            Math.floor(1000 + Math.random() * 9000);
+        const generatedCode = "QCE-" + username.toUpperCase().replace(/[^A-Z0-9]/g, "").substring(0, 4) + "-" + Math.floor(1000 + Math.random() * 9000);
 
-        await setDoc(
-            doc(db, "users", user.uid),
-            {
-                username: username,
-                telegram_id: telegramId,
-                device_id: deviceId,
-                email: email,
-                coin: 0,
-                referral_code: generatedReferralCode,
-                referred_by: validReferralCode,
-                active_days: 0,
-                last_active_date: "",
-                email_verified: false,
-                telegram_verified: false,
-                role: "user",
-                status: "active",
-                ban_reason: "",
-                created_at: new Date().toISOString()
-            }
-        );
+        await setDoc(doc(db, "users", user.uid), {
+            username,
+            telegram_id: telegramId,
+            device_id: deviceId,
+            email,
+            coin: 0,
+            referral_code: generatedCode,
+            referred_by: validReferral,
+            referral_count: 0,
+            active_days: 0,
+            last_active_date: "",
+            email_verified: false,
+            role: "user",
+            status: "active",
+            ban_reason: "",
+            created_at: new Date().toISOString()
+        });
 
-        alert("Registration Successful.\n\nVerification Email Sent.");
-        window.location.href = "login.html";
+        showMsg("regMsg", "রেজিস্ট্রেশন সফল! ভেরিফিকেশন ইমেইল পাঠানো হয়েছে।", "green");
+        setTimeout(() => window.location.href = "login.html", 2000);
 
     } catch (error) {
-        console.log(error);
-        alert(
-            "REGISTER ERROR\n\n" +
-            (error.code || "") +
-            "\n\n" +
-            error.message
-        );
+        console.error(error);
+        showMsg("regMsg", error.message || "রেজিস্ট্রেশন ব্যর্থ");
+        if (btn) btn.disabled = false;
     }
-};
+}
 
-window.loginUser = async function () {
-
-    const emailInput = document.getElementById("loginEmail");
-    const passwordInput = document.getElementById("loginPassword");
-
-    const email = emailInput ? emailInput.value.trim() : "";
-    const password = passwordInput ? passwordInput.value : "";
+// ========== LOGIN ==========
+async function loginUser() {
+    const email = document.getElementById("loginEmail")?.value.trim() || "";
+    const password = document.getElementById("loginPassword")?.value || "";
 
     if (!email || !password) {
-        alert("Please enter both Email and Password");
+        showMsg("loginMsg", "Email এবং Password দিন");
         return;
     }
 
+    const btn = document.getElementById("loginBtn");
+    if (btn) btn.disabled = true;
+
     try {
-
-        const userCredential = await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        await user.reload();
+
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
             await signOut(auth);
-            alert("User Data Not Found");
+            showMsg("loginMsg", "ইউজার ডেটা পাওয়া যায়নি");
+            if (btn) btn.disabled = false;
             return;
         }
 
-        const userData = userSnap.data();
+        const data = userSnap.data();
 
-        // DEVICE CHECK
-        const savedDeviceId = localStorage.getItem("qce_device_id");
-
-        if (
-            userData.device_id &&
-            savedDeviceId &&
-            userData.device_id !== savedDeviceId
-        ) {
+        // Ban Check
+        if (data.status === "banned") {
             await signOut(auth);
-            alert("This Account Is Registered On Another Device");
+            showMsg("loginMsg", "অ্যাকাউন্ট ব্যান করা হয়েছে\nReason: " + (data.ban_reason || "Policy Violation"));
+            if (btn) btn.disabled = false;
             return;
         }
 
-        // BAN CHECK
-        if (userData.status === "banned") {
+        // Device Check
+        const savedDevice = localStorage.getItem("qce_device_id");
+        if (data.device_id && savedDevice && data.device_id !== savedDevice) {
             await signOut(auth);
-            alert(
-                "Your Account Has Been Suspended\n\nReason:\n" +
-                (userData.ban_reason || "Policy Violation")
-            );
+            showMsg("loginMsg", "এই অ্যাকাউন্ট অন্য ডিভাইসে রেজিস্টার করা");
+            if (btn) btn.disabled = false;
             return;
         }
 
-        await user.reload();
-
-        if (user.emailVerified) {
-            await updateDoc(userRef, {
-                email_verified: true
-            });
+        // Email Verification Check
+        if (!user.emailVerified) {
+            await signOut(auth);
+            showMsg("loginMsg", "ইমেইল ভেরিফাই করুন। ইনবক্স চেক করুন।");
+            if (btn) btn.disabled = false;
+            return;
         }
 
-        alert("Login Successful");
+        // Update verified flag
+        if (!data.email_verified) {
+            await updateDoc(userRef, { email_verified: true });
+        }
 
-        if (userData.role === "admin") {
+        if (data.role === "admin") {
             window.location.href = "admin/dashboard.html";
         } else {
             window.location.href = "dashboard.html";
         }
 
     } catch (error) {
-        console.log(error);
-        alert(
-            "LOGIN ERROR\n\n" +
-            (error.code || "") +
-            "\n\n" +
-            error.message
-        );
+        console.error(error);
+        showMsg("loginMsg", error.message || "লগইন ব্যর্থ");
+        if (btn) btn.disabled = false;
     }
-};
+}
+
+// Event Listeners
+document.addEventListener("DOMContentLoaded", () => {
+    const regBtn = document.getElementById("registerBtn");
+    if (regBtn) regBtn.addEventListener("click", registerUser);
+
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) loginBtn.addEventListener("click", loginUser);
+});
