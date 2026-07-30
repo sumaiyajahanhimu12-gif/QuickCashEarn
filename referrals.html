@@ -1,83 +1,47 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Referrals - QuickCashEarn</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Referrals - QuickCashEarn</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body><div class="container"><div class="top-bar">
+<body>
 
-    <button class="back-btn"
-    onclick="window.location.href='dashboard.html'">
-        ← Dashboard
-    </button>
+    <div class="container">
+        <div class="top-bar">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+        </div>
 
-</div>
+        <h1>👥 My Referrals</h1>
 
-<h1>👥 My Referrals</h1>
+        <div class="task-card">
+            <h3>Your Referral Code</h3>
+            <p style="font-size:22px; font-weight:bold;">
+                <span id="myCode">Loading...</span>
+            </p>
+        </div>
 
-<div class="task-card">
+        <div class="task-card">
+            <p>👤 Total Referrals: <strong><span id="totalReferrals">0</span></strong></p>
+            <p>✅ Valid Referrals: <strong><span id="validReferrals">0</span></strong></p>
+            <p>💰 Top 10 Referral Coins: <strong><span id="top10Coins">0</span></strong> / 100000</p>
+        </div>
 
-    <h3>Your Referral Code</h3>
+        <hr>
 
-    <p style="font-size:22px;font-weight:bold;">
-        <span id="myCode">
-            Loading...
-        </span>
-    </p>
+        <h2>Referral List</h2>
 
-</div>
+        <div id="referralList">
+            <div class="task-card">Loading Referrals...</div>
+        </div>
 
-<div class="task-card">
+        <hr>
 
-    <p>
-        👤 Total Referrals:
-        <strong>
-            <span id="totalReferrals">
-                0
-            </span>
-        </strong>
-    </p>
-
-    <p>
-        ✅ Valid Referrals:
-        <strong>
-            <span id="validReferrals">
-                0
-            </span>
-        </strong>
-    </p>
-
-    <p>
-        💰 Top 10 Referral Coins:
-        <strong>
-            <span id="top10Coins">
-                0
-            </span>
-        </strong>
-        / 100000
-    </p>
-
-</div>
-
-<hr>
-
-<h2>Referral List</h2>
-
-<div id="referralList">
-
-    <div class="task-card">
-        Loading Referrals...
+        <button onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
     </div>
 
-</div>
+    <script type="module" src="js/referrals.js"></script>
 
-<hr>
-
-<button
-onclick="window.location.href='dashboard.html'">
-    🏠 Dashboard
-</button>
-
-</div><script type="module" src="js/referrals.js"></script></body>
+</body>
 </html>
