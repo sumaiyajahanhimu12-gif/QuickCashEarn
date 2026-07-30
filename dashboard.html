@@ -3,65 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickCashEarn Dashboard</title>
+    <title>Dashboard - QuickCashEarn</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
     <div class="container">
         <h1>💰 QuickCashEarn</h1>
         <h2 id="welcomeText">Loading...</h2>
-
         <hr>
-
         <div class="task-card">
-            <p>
-                <strong>💰 Coin Balance:</strong><br>
-                <span id="coinBalance">0</span>
-            </p>
-
-            <p>
-                <strong>👥 Referral Code:</strong><br>
-                <span id="referralCode">Loading...</span>
-            </p>
-
-            <p>
-                <strong>🔥 Consecutive Active Days:</strong><br>
-                <span id="activeDays">0</span>
-            </p>
-
-            <p>
-                <strong>📧 Email Verification:</strong><br>
-                <span id="emailStatus">Checking...</span>
-            </p>
+            <p><strong>💰 Coin Balance:</strong><br><span id="coinBalance">0</span></p>
+            <p><strong>👥 Referral Code:</strong><br><span id="referralCode">Loading...</span></p>
+            <p><strong>🔥 Active Days:</strong><br><span id="activeDays">0</span></p>
+            <p><strong>👥 Referral Count:</strong><br><span id="referralCount">0</span></p>
+            <p><strong>📧 Email Status:</strong><br><span id="emailStatus">Checking...</span></p>
         </div>
-
         <hr>
-
-        <button onclick="window.location.href='tasks.html'">📋 View Tasks</button>
-        <button onclick="window.location.href='referrals.html'">👥 My Referrals</button>
+        <button onclick="window.location.href='tasks.html'">📋 Tasks</button>
+        <button onclick="window.location.href='referrals.html'">👥 Referrals</button>
         <button onclick="window.location.href='withdraw.html'">💰 Withdraw</button>
-        <button onclick="window.location.href='history.html'">📜 Withdraw History</button>
-
-        <button id="adminPanelBtn" style="display:none; background:#ef4444;">⚙️ Admin Panel</button>
-
+        <button onclick="window.location.href='history.html'">📜 History</button>
+        <button id="adminPanelBtn" style="display:none;background:#ef4444;">⚙️ Admin Panel</button>
         <br><br>
-
         <button id="logoutBtn">🚪 Logout</button>
     </div>
-
     <script type="module" src="js/dashboard.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const adminBtn = document.getElementById("adminPanelBtn");
-            if (adminBtn) {
-                adminBtn.addEventListener("click", () => {
-                    window.location.href = "admin/dashboard.html";
-                });
-            }
-        });
-    </script>
-
 </body>
 </html>
