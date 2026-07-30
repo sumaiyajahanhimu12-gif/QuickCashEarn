@@ -1,87 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickCashEarn Dashboard</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickCashEarn Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <h1>💰 QuickCashEarn</h1>
+        <h2 id="welcomeText">Loading...</h2>
 
-    <h1>💰 QuickCashEarn</h1>
+        <hr>
 
-    <h2 id="welcomeText">Loading...</h2>
+        <div class="task-card">
+            <p>
+                <strong>💰 Coin Balance:</strong><br>
+                <span id="coinBalance">0</span>
+            </p>
 
-    <hr>
+            <p>
+                <strong>👥 Referral Code:</strong><br>
+                <span id="referralCode">Loading...</span>
+            </p>
 
-    <div class="task-card">
+            <p>
+                <strong>🔥 Consecutive Active Days:</strong><br>
+                <span id="activeDays">0</span>
+            </p>
 
-        <p>
-            <strong>💰 Coin Balance:</strong><br>
-            <span id="coinBalance">0</span>
-        </p>
+            <p>
+                <strong>📧 Email Verification:</strong><br>
+                <span id="emailStatus">Checking...</span>
+            </p>
+        </div>
 
-        <p>
-            <strong>👥 Referral Code:</strong><br>
-            <span id="referralCode">Loading...</span>
-        </p>
+        <hr>
 
-        <p>
-            <strong>🔥 Consecutive Active Days:</strong><br>
-            <span id="activeDays">0</span>
-        </p>
+        <button onclick="window.location.href='tasks.html'">📋 View Tasks</button>
+        <button onclick="window.location.href='referrals.html'">👥 My Referrals</button>
+        <button onclick="window.location.href='withdraw.html'">💰 Withdraw</button>
+        <button onclick="window.location.href='history.html'">📜 Withdraw History</button>
 
-        <p>
-            <strong>📧 Email Verification:</strong><br>
-            <span id="emailStatus">Checking...</span>
-        </p>
+        <button id="adminPanelBtn" style="display:none; background:#ef4444;">⚙️ Admin Panel</button>
 
+        <br><br>
+
+        <button id="logoutBtn">🚪 Logout</button>
     </div>
 
-    <hr>
+    <script type="module" src="js/dashboard.js"></script>
 
-    <button onclick="window.location.href='tasks.html'">
-        📋 View Tasks
-    </button>
-
-    <button onclick="window.location.href='referrals.html'">
-        👥 My Referrals
-    </button>
-
-    <button onclick="window.location.href='withdraw.html'">
-        💰 Withdraw
-    </button>
-
-    <button onclick="window.location.href='history.html'">
-        📜 Withdraw History
-    </button>
-
-    <button
-    id="adminPanelBtn"
-    style="display:none;background:#ef4444;">
-        ⚙️ Admin Panel
-    </button>
-
-    <br><br>
-
-    <button id="logoutBtn">
-        🚪 Logout
-    </button>
-
-</div>
-
-<script type="module" src="js/dashboard.js"></script>
-
-<script>
-document
-.getElementById("adminPanelBtn")
-.addEventListener("click", () => {
-    window.location.href =
-    "admin/dashboard.html";
-});
-</script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const adminBtn = document.getElementById("adminPanelBtn");
+            if (adminBtn) {
+                adminBtn.addEventListener("click", () => {
+                    window.location.href = "admin/dashboard.html";
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>
