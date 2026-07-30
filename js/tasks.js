@@ -69,19 +69,30 @@ async function loadTasks() {
 
         tasksData.push({ id: taskId, ...task });
 
-        const link = task.link || "";
         container.innerHTML += `
             <div class="task-card">
                 <h3>${task.name}</h3>
                 <p>Reward: ${task.coin} Coins</p>
                 <p>Type: ${task.type}</p>
-                <button onclick="openTask('\( {taskId}', ' \){link}')">Open Task</button>
+                <button class="open-task-btn" data-id="${taskId}">Open Task</button>
                 <div id="claim-${taskId}"></div>
             </div>
             <hr>
         `;
     }
-    if (!container.innerHTML) container.innerHTML = "<p>No Tasks Available</p>";
+
+    if (!container.innerHTML) {
+        container.innerHTML = "<p>No Tasks Available</p>";
+        return;
+    }
+
+    document.querySelectorAll(".open-task-btn").forEach(btn => {
+        btn.onclick = function () {
+            const id = this.getAttribute("data-id");
+            const task = tasksData.find(t => t.id === id);
+            openTask(id, task ? task.link : "");
+        };
+    });
 }
 
 window.openTask = function (taskId, link) {
@@ -140,7 +151,6 @@ window.claimTask = async function (taskId) {
         await updateDoc(userRef, { coin: increment(task.coin) });
         await updateDoc(doc(db, "tasks", taskId), { completed_count: increment(1) });
 
-        // Referral Bonus 5%
         if (userData.referred_by && userData.referred_by.trim() !== "") {
             const refQ = query(collection(db, "users"), where("referral_code", "==", userData.referred_by));
             const refSnap = await getDocs(refQ);
@@ -164,7 +174,6 @@ window.claimTask = async function (taskId) {
             }
         }
 
-        // Active Days
         const lastDate = userData.last_active_date || "";
         if (lastDate !== today) {
             let newDays = 1;
