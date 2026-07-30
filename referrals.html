@@ -7,41 +7,28 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
     <div class="container">
-        <div class="top-bar">
-            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Dashboard</button>
-        </div>
-
+        <button onclick="window.location.href='dashboard.html'">← Dashboard</button>
         <h1>👥 My Referrals</h1>
 
         <div class="task-card">
             <h3>Your Referral Code</h3>
-            <p style="font-size:22px; font-weight:bold;">
-                <span id="myCode">Loading...</span>
-            </p>
+            <p style="font-size:22px;font-weight:bold;"><span id="myCode">Loading...</span></p>
         </div>
 
         <div class="task-card">
             <p>👤 Total Referrals: <strong><span id="totalReferrals">0</span></strong></p>
-            <p>✅ Valid Referrals: <strong><span id="validReferrals">0</span></strong></p>
             <p>💰 Top 10 Referral Coins: <strong><span id="top10Coins">0</span></strong> / 100000</p>
         </div>
 
         <hr>
-
         <h2>Referral List</h2>
-
         <div id="referralList">
-            <div class="task-card">Loading Referrals...</div>
+            <div class="task-card">Loading...</div>
         </div>
-
         <hr>
-
         <button onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
     </div>
-
     <script type="module" src="js/referrals.js"></script>
-
 </body>
 </html>
