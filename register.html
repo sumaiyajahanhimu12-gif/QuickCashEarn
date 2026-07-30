@@ -1,103 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register - QuickCashEarn</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - QuickCashEarn</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <h1>Create Account</h1>
 
-    <h1>Create Account</h1>
+        <input type="text" id="username" placeholder="Username"><br><br>
+        <input type="text" id="telegramId" placeholder="Telegram ID"><br><br>
+        <input type="text" id="deviceId" placeholder="Device ID" readonly><br><br>
+        <input type="email" id="email" placeholder="Email"><br><br>
+        <input type="password" id="password" placeholder="Password"><br><br>
+        <input type="text" id="referralCode" placeholder="Referral Code (Optional)"><br><br>
 
-    <input
-    type="text"
-    id="username"
-    placeholder="Username">
+        <button onclick="registerUser()">Register</button>
 
-    <br><br>
+        <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
 
-    <input
-    type="text"
-    id="telegramId"
-    placeholder="Telegram ID">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let deviceId = localStorage.getItem("qce_device_id");
+            if (!deviceId) {
+                deviceId = "DEV-" + Date.now() + "-" + Math.random().toString(36).substring(2, 12);
+                localStorage.setItem("qce_device_id", deviceId);
+            }
+            const deviceInput = document.getElementById("deviceId");
+            if (deviceInput) {
+                deviceInput.value = deviceId;
+            }
+        });
+    </script>
 
-    <br><br>
-
-    <!-- NEW FIELD -->
-    <input
-    type="text"
-    id="deviceId"
-    placeholder="Device ID"
-    readonly>
-
-    <br><br>
-
-    <input
-    type="email"
-    id="email"
-    placeholder="Email">
-
-    <br><br>
-
-    <input
-    type="password"
-    id="password"
-    placeholder="Password">
-
-    <br><br>
-
-    <input
-    type="text"
-    id="referralCode"
-    placeholder="Referral Code (Optional)">
-
-    <br><br>
-
-    <button onclick="registerUser()">
-        Register
-    </button>
-
-    <p>
-        Already have an account?
-        <a href="login.html">
-            Login
-        </a>
-    </p>
-
-</div>
-
-<script>
-let deviceId = localStorage.getItem("qce_device_id");
-
-if (!deviceId) {
-    deviceId =
-        "DEV-" +
-        Date.now() +
-        "-" +
-        Math.random()
-        .toString(36)
-        .substring(2, 12);
-
-    localStorage.setItem(
-        "qce_device_id",
-        deviceId
-    );
-}
-
-window.addEventListener(
-    "load",
-    () => {
-        document.getElementById(
-            "deviceId"
-        ).value = deviceId;
-    }
-);
-</script>
-
-<script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/auth.js"></script>
 
 </body>
 </html>
