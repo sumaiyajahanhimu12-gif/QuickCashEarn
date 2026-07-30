@@ -7,28 +7,22 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
     <div class="container">
         <h1>💰 QuickCashEarn</h1>
         <p>Earn Coins by Completing Tasks & Referring Friends</p>
-
         <div class="buttons">
             <a href="login.html">Login</a>
             <a href="register.html">Register</a>
         </div>
     </div>
 
-    <!-- অটো-লগইন চেক করার জন্য নিচের কোডটি যুক্ত করা হয়েছে -->
     <script type="module">
         import { auth, onAuthStateChanged } from "./js/firebase.js";
-
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // ইউজার আগে থেকে লগইন থাকলে সরাসরি ড্যাশবোর্ডে পাঠাবে
                 window.location.href = "dashboard.html";
             }
         });
     </script>
-
 </body>
 </html>
