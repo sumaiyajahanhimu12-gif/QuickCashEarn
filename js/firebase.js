@@ -22,14 +22,15 @@ import {
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// নতুন ফায়ারবেস প্রজেক্টের কনফিগারেশন
 const firebaseConfig = {
-    apiKey: "AIzaSyBLULYy8cH0O1pCqygTTgLUvmlWFEMk-9Y",
-    authDomain: "quickcashearn-2477f.firebaseapp.com",
-    projectId: "quickcashearn-2477f",
-    storageBucket: "quickcashearn-2477f.firebasestorage.app",
-    messagingSenderId: "573761874377",
-    appId: "1:573761874377:web:3aa98c3062bcd9aff1a018",
-    measurementId: "G-X7TD58F2K"
+    apiKey: "AIzaSyAumEVLzqs-wrxXbbBqPeTIxBhfxA4d_a4",
+    authDomain: "quick-cash-earn.firebaseapp.com",
+    projectId: "quick-cash-earn",
+    storageBucket: "quick-cash-earn.firebasestorage.app",
+    messagingSenderId: "1056884667784",
+    appId: "1:1056884667784:web:bd774d350f10457ec8b63d",
+    measurementId: "G-EHJHZHPJ9V"
 };
 
 const app = initializeApp(firebaseConfig);
