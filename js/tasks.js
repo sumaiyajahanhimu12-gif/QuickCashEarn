@@ -1,18 +1,18 @@
-import { 
-    auth, 
-    db, 
-    onAuthStateChanged, 
-    signOut, 
-    collection, 
-    getDocs, 
-    doc, 
-    getDoc, 
-    setDoc, 
-    updateDoc, 
-    increment, 
-    addDoc, 
-    query, 
-    where 
+import {
+    auth,
+    db,
+    onAuthStateChanged,
+    signOut,
+    collection,
+    getDocs,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    increment,
+    addDoc,
+    query,
+    where
 } from "./firebase.js";
 
 let tasksData = [];
@@ -22,32 +22,23 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "login.html";
         return;
     }
-
     try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-            alert("User Not Found");
+        await user.reload();
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (!userSnap.exists() || userSnap.data().status === "banned") {
             await signOut(auth);
             window.location.href = "login.html";
             return;
         }
-
-        const userData = userSnap.data();
-
-        // BAN PROTECTION
-        if (userData.status === "banned") {
-            alert("Your Account Has Been Suspended");
+        if (!user.emailVerified) {
             await signOut(auth);
+            alert("ইমেইল ভেরিফাই করুন");
             window.location.href = "login.html";
             return;
         }
-
         await loadTasks();
-
-    } catch (error) {
-        alert(error.message);
+    } catch (e) {
+        alert(e.message);
     }
 });
 
@@ -55,190 +46,107 @@ async function loadTasks() {
     const user = auth.currentUser;
     const container = document.getElementById("tasksContainer");
     if (!container) return;
-
     container.innerHTML = "";
-
-    const snapshot = await getDocs(collection(db, "tasks"));
     tasksData = [];
 
+    const snapshot = await getDocs(collection(db, "tasks"));
     const today = new Date().toISOString().split("T")[0];
 
     for (const taskDoc of snapshot.docs) {
         const task = taskDoc.data();
-
-        if (task.status !== "published") {
-            continue;
-        }
-
-        // TASK LIMIT CHECK
-        if (task.limit && (task.completed_count || 0) >= task.limit) {
-            continue;
-        }
+        if (task.status !== "published") continue;
+        if (task.limit && (task.completed_count || 0) >= task.limit) continue;
 
         const taskId = taskDoc.id;
-        const claimId = `${user.uid}_${taskId}`;
-        const claimRef = doc(db, "task_claims", claimId);
-        const claimSnap = await getDoc(claimRef);
+        const claimId = `\( {user.uid}_ \){taskId}`;
+        const claimSnap = await getDoc(doc(db, "task_claims", claimId));
 
         if (claimSnap.exists()) {
-            const claimData = claimSnap.data();
-
-            if (task.type === "permanent") {
-                continue;
-            }
-
-            if (task.type === "daily" && claimData.last_claim_date === today) {
-                continue;
-            }
+            const claim = claimSnap.data();
+            if (task.type === "permanent") continue;
+            if (task.type === "daily" && claim.last_claim_date === today) continue;
         }
 
-        tasksData.push({
-            id: taskId,
-            ...task
-        });
-
+        tasksData.push({ id: taskId, ...task });
         container.innerHTML += `
-        <div class="task-card">
-            <h3>${task.name}</h3>
-            <p>Reward: ${task.coin} Coins</p>
-            <p>Type: ${task.type}</p>
-            <button onclick="openTask('${taskId}','${task.link}')">Open Task</button>
-            <div id="claim-${taskId}"></div>
-        </div>
-        <hr>
+            <div class="task-card">
+                <h3>${task.name}</h3>
+                <p>Reward: ${task.coin} Coins</p>
+                <p>Type: ${task.type}</p>
+                <button onclick="openTask('\( {taskId}',' \){task.link || ''}')">Open Task</button>
+                <div id="claim-${taskId}"></div>
+            </div>
+            <hr>
         `;
     }
-
-    if (container.innerHTML === "") {
-        container.innerHTML = "<p>No Tasks Available</p>";
-    }
+    if (!container.innerHTML) container.innerHTML = "<p>No Tasks Available</p>";
 }
 
 window.openTask = function (taskId, link) {
-    window.open(link, "_blank");
-
-    const task = tasksData.find((t) => t.id === taskId);
+    if (link) window.open(link, "_blank");
+    const task = tasksData.find(t => t.id === taskId);
     let html = "";
-
-    if (task && task.code && task.code.trim() !== "") {
-        html += `
-        <br>
-        <input type="text" id="code-${taskId}" placeholder="Enter Verification Code">
-        <br><br>
-        `;
+    if (task?.code?.trim()) {
+        html += `<br><input type="text" id="code-${taskId}" placeholder="Verification Code"><br><br>`;
     }
-
-    html += `
-    <button onclick="claimTask('${taskId}')">Claim Reward</button>
-    `;
-
-    const claimDiv = document.getElementById(`claim-${taskId}`);
-    if (claimDiv) {
-        claimDiv.innerHTML = html;
-    }
+    html += `<button onclick="claimTask('${taskId}')">Claim Reward</button>`;
+    const div = document.getElementById(`claim-${taskId}`);
+    if (div) div.innerHTML = html;
 };
 
 window.claimTask = async function (taskId) {
     try {
         const user = auth.currentUser;
-        if (!user) {
-            alert("Login Required");
-            return;
-        }
+        if (!user) return alert("Login Required");
 
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-            alert("User Not Found");
-            return;
-        }
-
+        if (!userSnap.exists()) return alert("User Not Found");
         const userData = userSnap.data();
-
-        // BAN PROTECTION
         if (userData.status === "banned") {
-            alert("Your Account Has Been Suspended");
             await signOut(auth);
             window.location.href = "login.html";
             return;
         }
 
-        const task = tasksData.find((t) => t.id === taskId);
-        if (!task) {
-            alert("Task Not Found");
-            return;
-        }
+        const task = tasksData.find(t => t.id === taskId);
+        if (!task) return alert("Task Not Found");
+        if (task.limit && (task.completed_count || 0) >= task.limit) return alert("Task Limit Reached");
 
-        // TASK LIMIT SAFETY CHECK
-        if (task.limit && (task.completed_count || 0) >= task.limit) {
-            alert("Task Limit Reached");
-            return;
-        }
-
-        if (task.code && task.code.trim() !== "") {
-            const codeInput = document.getElementById(`code-${taskId}`);
-            const enteredCode = codeInput ? codeInput.value.trim() : "";
-
-            if (enteredCode !== task.code) {
-                alert("Wrong Verification Code");
-                return;
-            }
+        if (task.code?.trim()) {
+            const entered = document.getElementById(`code-${taskId}`)?.value.trim() || "";
+            if (entered !== task.code) return alert("Wrong Verification Code");
         }
 
         const today = new Date().toISOString().split("T")[0];
-        const claimId = `${user.uid}_${taskId}`;
+        const claimId = `\( {user.uid}_ \){taskId}`;
         const claimRef = doc(db, "task_claims", claimId);
         const claimSnap = await getDoc(claimRef);
 
         if (claimSnap.exists()) {
-            const claimData = claimSnap.data();
-
-            if (task.type === "permanent") {
-                alert("Already Claimed");
-                return;
-            }
-
-            if (task.type === "daily" && claimData.last_claim_date === today) {
-                alert("Already Claimed Today");
-                return;
-            }
+            const claim = claimSnap.data();
+            if (task.type === "permanent") return alert("Already Claimed");
+            if (task.type === "daily" && claim.last_claim_date === today) return alert("Already Claimed Today");
         }
 
-        // USER COIN INCREASE
-        await updateDoc(userRef, {
-            coin: increment(task.coin)
-        });
+        // Coin + Task count
+        await updateDoc(userRef, { coin: increment(task.coin) });
+        await updateDoc(doc(db, "tasks", taskId), { completed_count: increment(1) });
 
-        // TASK COMPLETED COUNT INCREASE
-        await updateDoc(doc(db, "tasks", taskId), {
-            completed_count: increment(1)
-        });
-
-        // REFERRAL BONUS (5%)
-        if (userData.referred_by && userData.referred_by.trim() !== "") {
-            const referralQuery = query(
-                collection(db, "users"),
-                where("referral_code", "==", userData.referred_by)
-            );
-
-            const referralSnap = await getDocs(referralQuery);
-
-            if (!referralSnap.empty) {
-                const referrerDoc = referralSnap.docs[0];
-
-                if (referrerDoc.id !== user.uid) {
+        // Referral Bonus 5%
+        if (userData.referred_by?.trim()) {
+            const refQ = query(collection(db, "users"), where("referral_code", "==", userData.referred_by));
+            const refSnap = await getDocs(refQ);
+            if (!refSnap.empty) {
+                const referrer = refSnap.docs[0];
+                if (referrer.id !== user.uid) {
                     const bonus = Math.floor(task.coin * 0.05);
-
                     if (bonus > 0) {
-                        await updateDoc(doc(db, "users", referrerDoc.id), {
-                            coin: increment(bonus)
-                        });
-
+                        await updateDoc(doc(db, "users", referrer.id), { coin: increment(bonus) });
                         await addDoc(collection(db, "referral_bonus_history"), {
-                            referrer_uid: referrerDoc.id,
+                            referrer_uid: referrer.id,
                             referred_uid: user.uid,
-                            referred_username: userData.username,
+                            referred_username: userData.username || "",
                             task_id: taskId,
                             task_coin: task.coin,
                             bonus_coin: bonus,
@@ -249,26 +157,15 @@ window.claimTask = async function (taskId) {
             }
         }
 
-        // ACTIVE DAYS UPDATE
+        // Active Days (consecutive)
         const lastDate = userData.last_active_date || "";
-
         if (lastDate !== today) {
-            let newActiveDays = 1;
-
+            let newDays = 1;
             if (lastDate) {
-                const last = new Date(lastDate);
-                const current = new Date(today);
-                const diffDays = Math.floor((current - last) / (1000 * 60 * 60 * 24));
-
-                if (diffDays === 1) {
-                    newActiveDays = (userData.active_days || 0) + 1;
-                }
+                const diff = Math.floor((new Date(today) - new Date(lastDate)) / 86400000);
+                if (diff === 1) newDays = (userData.active_days || 0) + 1;
             }
-
-            await updateDoc(userRef, {
-                active_days: newActiveDays,
-                last_active_date: today
-            });
+            await updateDoc(userRef, { active_days: newDays, last_active_date: today });
         }
 
         await setDoc(claimRef, {
@@ -279,11 +176,9 @@ window.claimTask = async function (taskId) {
             claimed_at: new Date().toISOString()
         });
 
-        alert(`${task.coin} Coins Added Successfully`);
+        alert(task.coin + " Coins Added");
         await loadTasks();
-
-    } catch (error) {
-        alert(error.message);
+    } catch (e) {
+        alert(e.message);
     }
 };
-
